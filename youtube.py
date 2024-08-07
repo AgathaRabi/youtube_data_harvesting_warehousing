@@ -60,29 +60,33 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 #print(Channel_Details)
 
 ## GET VIDEO IDS
+def get_channel_video_id(current_channel_id):
+    ## create a list to upload the videos ids
 
-## create a list to upload the videos ids
+    videos_ids_list = []
 
-videos_ids_list = []
+    ## now to get the upload id
+    #Call_Api_vd_id = youtube_access.channels().list(id = 'UC5HdAapbvqWN65GIqpWWL3Q',
+                                                        #part = 'contentDetails').execute()
+    Call_Api_vd_id = youtube_access.channels().list(id = current_channel_id,
+                                                    part ='contentDetails').execute()
+    upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
+    #print(upload_id_vd_id)
+    ##  get next page token so that all video ids can be retrieved
+    get_next_page_token = None
+    ## to get all video ids a while loop is used
+    while True:
+        #now to get the video id, for each video at a time
+        get_vid_id = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id, maxResults = 50, pageToken = get_next_page_token ).execute()
+        #print(get_vid_id)
 
-#Call_Api = youtube_access.Channels_plylst_Id().list(id = Id_Channel)
-"""Call_Api_vd_id = youtube_access.Channels_plylst_Id().list(id = 'UC5HdAapbvqWN65GIqpWWL3Q',
-                                                    part = 'contentDetails').execute()
-print(Call_Api_vd_id)"""
-## now to get the upload id
-Call_Api_vd_id = youtube_access.channels().list(id = 'UC5HdAapbvqWN65GIqpWWL3Q',
-                                                    part = 'contentDetails').execute()
-#print(Call_Api_vd_id)
-#playlist_id_vd_id = ['contentDetails']['relatedPlaylists']['uploads']# error
-#print(Call_Api_vd_id['items'])
-#print(Call_Api_vd_id['items']['contentDetails']['relatedPlaylists']['uploads']) ## error: list indices must be integer
-#print(Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists'])
-#print(Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads'])
+        for index in range(len(get_vid_id['items'])):
+            videos_ids_list.append(get_vid_id['items'][index]['snippet']['resourceId']['videoId']) # will get only first video id
 
-upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
-#print(upload_id_vd_id)
-
-#now to get the video id
-get_vid_id = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id, maxResults = 50).execute()
-#print(get_vid_id)
-
+        get_next_page_token = get_vid_id.get('nextPageToken')
+        ## to break the while loop when you reach the end of pages
+        if get_next_page_token is None:
+            break
+    #print(len(videos_ids_list))
+    #print(videos_ids_list)
+    return videos_ids_list
