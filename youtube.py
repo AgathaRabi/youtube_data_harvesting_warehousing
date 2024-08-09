@@ -96,18 +96,39 @@ all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
 
 
 ### get that particular channel's videos' information, using the respective video ids
+def video_details_in_channel(all_video_ids):
+    video_meta_data_for_allVs = []
+    for each_video_id in all_video_ids:
+        request_video_information_api = youtube_access.videos().list(part = 'snippet, ContentDetails, statistics',
+                                                                 id = each_video_id)
+        get_video_details = request_video_information_api.execute()
+    #print(get_video_details['items'])
+    #print(get_video_details['items'][0]['snippet']['tags'])
+    #print(get_video_details['items'][0]['snippet']['viewCount'])
+        for item in get_video_details["items"]:
+            #print(item['snippet'])
+            video_meta_data = dict(Channel_Selected = item['snippet']['channelTitle'],
+                                    Selected_Channel_Id = item['snippet']['channelId'],
+                                    video_id = item['id'], video_title = item['snippet']['title'],
+                                    tags_video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
+                                    number_likes=item['snippet']['viewCount'] if 'viewCounts' in item['snippet'] else None,
+                                    thumbnalis = item['snippet']['thumbnails'] if 'thumbnails' in item['snippet'] else None,
+                                    description = item['snippet']['description'] if 'description' in item['snippet'] else None,
+                                    published_date = item['snippet']['publishedAt'],
+                                    duration_video = item['contentDetails']['duration'],
+                                   number_views = item.get('viewCount'),
+                                   number_comments = item.get('commentCount'),
+                                   favourite_count = item['statistics']['favouriteCount'],
+                                   defenition = item['contentDetails']['definition'],
+                                   caption_status = item['contentDetails']['caption'])
 
-for each_video_id in all_video_ids:
-    request_video_information_api = youtube_access.videos().list(part = 'snippet, ContentDetails, statistics',
-                                                             id = each_video_id)
-    get_video_details = request_video_information_api.execute()
-#print(get_video_details['items'][0]['snippet']['tags'])
-    for item in get_video_details["items"]:
-        required_data_video = dict(Channel_Selected = item['snippet']['channelTitle'],
-                                   Selected_Channel_Id = item['snippet']['channelId'],
-                                   video_id = item['id'], video_title = item['snippet']['title'],
-                                   tags_video=item['snippet']['tags']) # ,
-                                   #number_likes=item['snippet']['statistics']['viewCount']
-                                   #)
+            # number_likes=item['snippet']['statistics']['viewCount']
+            video_meta_data_for_allVs.append(video_meta_data)
+        # print(video_meta_data_list)
+    return video_meta_data_for_allVs
 
-print(required_data_video)
+video_details_of_channael = video_details_in_channel(all_video_ids)
+
+
+
+
