@@ -107,8 +107,8 @@ def video_details_in_channel(all_video_ids):
     #print(get_video_details['items'][0]['snippet']['viewCount'])
         for item in get_video_details["items"]:
             #print(item['snippet'])
-            video_meta_data = dict(Channel_Selected = item['snippet']['channelTitle'],
-                                    Selected_Channel_Id = item['snippet']['channelId'],
+            video_meta_data = dict(channel_selected = item['snippet']['channelTitle'],
+                                    selected_channel_id = item['snippet']['channelId'],
                                     video_id = item['id'], video_title = item['snippet']['title'],
                                     tags_video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
                                     number_likes=item['snippet']['viewCount'] if 'viewCounts' in item['snippet'] else None,
@@ -130,5 +130,16 @@ def video_details_in_channel(all_video_ids):
 video_details_of_channael = video_details_in_channel(all_video_ids)
 
 
+###  to get the comment details
+
+##  'science with sam' another youtube channel - to limit the api quota usage - ""
+
+for every_video_id in all_video_ids:
+    request_video_comment_api =youtube_access.commentThreads().list(part = 'snippet',
+                                                                 videoId = every_video_id, maxResults = 50)
+    to_get_comment_details = request_video_comment_api.execute()
+    for comment_detail in to_get_comment_details['items']:
+        comment_meta_data = dict(comment_gvn_id = comment_detail['snippet']['topLevelComment']['id'],
+                                 video_id = )
 
 
