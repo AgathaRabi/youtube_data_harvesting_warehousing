@@ -140,6 +140,6 @@ for every_video_id in all_video_ids:
     to_get_comment_details = request_video_comment_api.execute()
     for comment_detail in to_get_comment_details['items']:
         comment_meta_data = dict(comment_gvn_id = comment_detail['snippet']['topLevelComment']['id'],
-                                 video_id = )
+                                 video_id = comment_detail['snippet']['topLevelComment'] )
 
 
