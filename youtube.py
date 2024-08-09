@@ -46,13 +46,13 @@ def get_channel_info(Id_Channel):
     print(response['items'][0]['snippet']['title'])"""
 
     for information in response['items']:  ### here you are getting only the details you need of channel.
-        data = dict(Channel_name = information['snippet']['title'],
-                    Channel_Id = information['id'],
-                    Subscribers_count = information['statistics']['subscriberCount'],
-                    Views_channel = information['statistics']['viewCount'],
-                    Total_videos = information['statistics']['videoCount'],
-                    Channel_Description = information['snippet']['description'],
-                    Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
+        data = dict(channel_name = information['snippet']['title'],
+                    channel_id = information['id'],
+                    subscribers_count = information['statistics']['subscriberCount'],
+                    views_channel = information['statistics']['viewCount'],
+                    total_videos = information['statistics']['videoCount'],
+                    channel_Description = information['snippet']['description'],
+                    playlist_id = information['contentDetails']['relatedPlaylists']['uploads'])
     return data
 
 Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
@@ -61,7 +61,7 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 #print(Channel_Details)
 
 ## GET VIDEO IDS
-def get_channel_video_id(current_channel_id):
+"""def get_channel_video_id(current_channel_id):
     ## create a list to upload the videos ids
 
     videos_ids_list = []
@@ -92,13 +92,33 @@ def get_channel_video_id(current_channel_id):
     #print(videos_ids_list)
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')"""
+
+####  trying to get only 10 videos to use the api efficiently
+
+all_video_ids = []
+
+## now to get the upload id
+#Call_Api_vd_id = youtube_access.channels().list(id = 'UC5HdAapbvqWN65GIqpWWL3Q',
+                                                    #part = 'contentDetails').execute()
+Call_Api_vd_id = youtube_access.channels().list(id = "UC5HdAapbvqWN65GIqpWWL3Q",
+                                                part ='contentDetails').execute()
+upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
+#print(upload_id_vd_id)
+
+get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id, maxResults = 5)
+
+for index in range(len(get_video_ids['items'])):
+    all_video_ids.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
+
+print(all_video_ids)
+
 
 
 ### get that particular channel's videos' information, using the respective video ids
-def video_details_in_channel(all_video_ids):
+def video_details_in_channel(obt_video_ids):
     video_meta_data_for_allVs = []
-    for each_video_id in all_video_ids:
+    for each_video_id in obt_video_ids:
         request_video_information_api = youtube_access.videos().list(part = 'snippet, ContentDetails, statistics',
                                                                  id = each_video_id)
         get_video_details = request_video_information_api.execute()
@@ -107,8 +127,8 @@ def video_details_in_channel(all_video_ids):
     #print(get_video_details['items'][0]['snippet']['viewCount'])
         for item in get_video_details["items"]:
             #print(item['snippet'])
-            video_meta_data = dict(channel_selected = item['snippet']['channelTitle'],
-                                    selected_channel_id = item['snippet']['channelId'],
+            video_meta_data = dict(channel_name = item['snippet']['channelTitle'],
+                                    channel_id = item['snippet']['channelId'],
                                     video_id = item['id'], video_title = item['snippet']['title'],
                                     tags_video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
                                     number_likes=item['snippet']['viewCount'] if 'viewCounts' in item['snippet'] else None,
@@ -121,7 +141,7 @@ def video_details_in_channel(all_video_ids):
                                    favourite_count = item['statistics']['favouriteCount'],
                                    defenition = item['contentDetails']['definition'],
                                    caption_status = item['contentDetails']['caption'])
-
+                                    ## above --- :  getting the specific details using slicing
             # number_likes=item['snippet']['statistics']['viewCount']
             video_meta_data_for_allVs.append(video_meta_data)
         # print(video_meta_data_list)
@@ -133,13 +153,32 @@ video_details_of_channael = video_details_in_channel(all_video_ids)
 ###  to get the comment details
 
 ##  'science with sam' another youtube channel - to limit the api quota usage - ""
+def comment_details_videos(total_video_ids):
+    comment_meta_data_list =[]
+    try:
+        for every_video_id in total_video_ids:
+            request_video_comment_api =youtube_access.commentThreads().list(part = 'snippet',
+                                                                         videoId = every_video_id, maxResults = 50)
+            to_get_comment_details = request_video_comment_api.execute()
+            for comment_detail in to_get_comment_details['items']:
+                ## getting specific details using slicing
+                comment_meta_data = dict(comment_gvn_id = comment_detail['snippet']['topLevelComment']['id'],
+                                         video_id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
+                                         comment_text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
+                                         comment_author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
+                                         Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
+                comment_meta_data_list.append(comment_meta_data)
 
-for every_video_id in all_video_ids:
-    request_video_comment_api =youtube_access.commentThreads().list(part = 'snippet',
-                                                                 videoId = every_video_id, maxResults = 50)
-    to_get_comment_details = request_video_comment_api.execute()
-    for comment_detail in to_get_comment_details['items']:
-        comment_meta_data = dict(comment_gvn_id = comment_detail['snippet']['topLevelComment']['id'],
-                                 video_id = comment_detail['snippet']['topLevelComment'] )
+            print(comment_meta_data_list)
+
+    except:
+        pass
+
+    return comment_meta_data_list
+
+comment_meta_data_video = comment_details_videos(all_video_ids)
+
+print(comment_meta_data_video)
+
 
 
