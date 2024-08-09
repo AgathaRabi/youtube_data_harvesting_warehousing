@@ -57,6 +57,7 @@ def get_channel_info(Id_Channel):
 
 Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 
+
 #print(Channel_Details)
 
 ## GET VIDEO IDS
@@ -90,3 +91,23 @@ def get_channel_video_id(current_channel_id):
     #print(len(videos_ids_list))
     #print(videos_ids_list)
     return videos_ids_list
+
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
+
+
+### get that particular channel's videos' information, using the respective video ids
+
+for each_video_id in all_video_ids:
+    request_video_information_api = youtube_access.videos().list(part = 'snippet, ContentDetails, statistics',
+                                                             id = each_video_id)
+    get_video_details = request_video_information_api.execute()
+#print(get_video_details['items'][0]['snippet']['tags'])
+    for item in get_video_details["items"]:
+        required_data_video = dict(Channel_Selected = item['snippet']['channelTitle'],
+                                   Selected_Channel_Id = item['snippet']['channelId'],
+                                   video_id = item['id'], video_title = item['snippet']['title'],
+                                   tags_video=item['snippet']['tags']) # ,
+                                   #number_likes=item['snippet']['statistics']['viewCount']
+                                   #)
+
+print(required_data_video)
