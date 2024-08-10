@@ -46,13 +46,13 @@ def get_channel_info(Id_Channel):
     print(response['items'][0]['snippet']['title'])"""
 
     for information in response['items']:  ### here you are getting only the details you need of channel.
-        data = dict(channel_name = information['snippet']['title'],
-                    channel_id = information['id'],
-                    subscribers_count = information['statistics']['subscriberCount'],
-                    views_channel = information['statistics']['viewCount'],
-                    total_videos = information['statistics']['videoCount'],
-                    channel_Description = information['snippet']['description'],
-                    playlist_id = information['contentDetails']['relatedPlaylists']['uploads'])
+        data = dict(Channel_Name = information['snippet']['title'],
+                    Channel_Id = information['id'],
+                    Subscribers_Count = information['statistics']['subscriberCount'],
+                    Views_Channel = information['statistics']['viewCount'],
+                    Total_Videos = information['statistics']['videoCount'],
+                    Channel_Description = information['snippet']['description'],
+                    Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
     return data
 
 Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
@@ -61,7 +61,7 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 #print(Channel_Details)
 
 ## GET VIDEO IDS
-"""def get_channel_video_id(current_channel_id):
+def get_channel_video_id(current_channel_id):
     ## create a list to upload the videos ids
 
     videos_ids_list = []
@@ -92,9 +92,9 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
     #print(videos_ids_list)
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')"""
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
 
-####  trying to get only 10 videos to use the api efficiently
+"""####  trying to get only 10 or 5 videos to use the api efficiently
 
 all_video_ids = []
 
@@ -111,7 +111,7 @@ get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId
 for index in range(len(get_video_ids['items'])):
     all_video_ids.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
 
-print(all_video_ids)
+print(all_video_ids)"""
 
 
 
@@ -127,20 +127,20 @@ def video_details_in_channel(obt_video_ids):
     #print(get_video_details['items'][0]['snippet']['viewCount'])
         for item in get_video_details["items"]:
             #print(item['snippet'])
-            video_meta_data = dict(channel_name = item['snippet']['channelTitle'],
-                                    channel_id = item['snippet']['channelId'],
-                                    video_id = item['id'], video_title = item['snippet']['title'],
-                                    tags_video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
-                                    number_likes=item['snippet']['viewCount'] if 'viewCounts' in item['snippet'] else None,
-                                    thumbnalis = item['snippet']['thumbnails'] if 'thumbnails' in item['snippet'] else None,
-                                    description = item['snippet']['description'] if 'description' in item['snippet'] else None,
-                                    published_date = item['snippet']['publishedAt'],
-                                    duration_video = item['contentDetails']['duration'],
-                                   number_views = item.get('viewCount'),
-                                   number_comments = item.get('commentCount'),
-                                   favourite_count = item['statistics']['favouriteCount'],
-                                   defenition = item['contentDetails']['definition'],
-                                   caption_status = item['contentDetails']['caption'])
+            video_meta_data = dict(Channel_Name = item['snippet']['channelTitle'],
+                                    Channel_Id = item['snippet']['channelId'],
+                                    Video_Id = item['id'], video_title = item['snippet']['title'],
+                                    Tags_Video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
+                                    Number_Likes=item['snippet']['viewCount'] if 'viewCounts' in item['snippet'] else None,
+                                    Thumbnalis = item['snippet']['thumbnails'] if 'thumbnails' in item['snippet'] else None,
+                                    Description = item['snippet']['description'] if 'description' in item['snippet'] else None,
+                                    Published_Date = item['snippet']['publishedAt'],
+                                    Duration_Video = item['contentDetails']['duration'],
+                                   Number_Views = item.get('viewCount'),
+                                   Number_Comments = item.get('commentCount'),
+                                   Favourite_Count = item['statistics']['favouriteCount'],
+                                   Defenition = item['contentDetails']['definition'],
+                                   Caption_Status = item['contentDetails']['caption'])
                                     ## above --- :  getting the specific details using slicing
             # number_likes=item['snippet']['statistics']['viewCount']
             video_meta_data_for_allVs.append(video_meta_data)
@@ -162,10 +162,10 @@ def comment_details_videos(total_video_ids):
             to_get_comment_details = request_video_comment_api.execute()
             for comment_detail in to_get_comment_details['items']:
                 ## getting specific details using slicing
-                comment_meta_data = dict(comment_gvn_id = comment_detail['snippet']['topLevelComment']['id'],
-                                         video_id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
-                                         comment_text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
-                                         comment_author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
+                comment_meta_data = dict(Comment_Gvn_Id = comment_detail['snippet']['topLevelComment']['id'],
+                                         Video_Id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
+                                         Comment_Text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
+                                         Comment_Author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
                                          Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
                 comment_meta_data_list.append(comment_meta_data)
 
@@ -178,7 +178,66 @@ def comment_details_videos(total_video_ids):
 
 comment_meta_data_video = comment_details_videos(all_video_ids)
 
-print(comment_meta_data_video)
+#print(comment_meta_data_video)
+
+
+## to get details of playlist :(this set has only few playlists for limited API usage)
+
+"""playlist_meta_data_list = []
+
+get_playlistDetails_req_api = youtube_access.playlists().list(
+                        part = 'snippet, contentDetails' ,
+                        channelId = 'UC5HdAapbvqWN65GIqpWWL3Q',
+                        maxResults = 5
+                        )
+get_playlist_details = get_playlistDetails_req_api.execute()
+
+for playlist_item in get_playlist_details['items']:
+
+    playlist_details = dict(Playlist_Id = playlist_item['id'],
+                            Title = playlist_item['snippet']['title'],
+                            Channel_Id = playlist_item['snippet']['channelId'],
+                            Channel_Name = playlist_item['snippet']['channelTitle'],
+                            Playlist_Published_At = playlist_item['snippet']['publishedAt'],
+                            Number_Videos_Playlist = playlist_item['contentDetails']['itemCount'])
+
+    playlist_meta_data_list.append(playlist_details)"""
+
+
+
+#### the complete playlist for the actual program:
+def playlist_meta_data(the_channel_id):
+
+    next_page_token_playLists = None
+    playlist_meta_data_list = []
+
+    while True:
+        get_playlistDetails_req_api = youtube_access.playlists().list(
+                                part = 'snippet, contentDetails' ,
+                                channelId = the_channel_id, #'UC5HdAapbvqWN65GIqpWWL3Q',
+                                maxResults = 50,
+                                pageToken = next_page_token_playLists
+                                )
+        get_playlist_details_res = get_playlistDetails_req_api.execute()
+
+        for playlist_item in get_playlist_details_res['items']:
+            playlist_details = dict(Playlist_Id = playlist_item['id'],
+                                    Title = playlist_item['snippet']['title'],
+                                    Channel_Id = playlist_item['snippet']['channelId'],
+                                    Channel_Name = playlist_item['snippet']['channelTitle'],
+                                    Playlist_Published_At = playlist_item['snippet']['publishedAt'],
+                                    Number_Videos_Playlist = playlist_item['contentDetails']['itemCount'])
+            playlist_meta_data_list.append(playlist_details)
+
+        next_page_token_playLists = get_playlist_details_res.get('nextPageToken')
+
+        if next_page_token_playLists is None:
+            break
+
+    return playlist_meta_data_list
+
+playlists_meta_data_channel = playlist_meta_data('UC5HdAapbvqWN65GIqpWWL3Q')
+
 
 
 
