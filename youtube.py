@@ -68,7 +68,7 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 
 ## GET all VIDEO IDS
 
-def get_channel_video_id(current_channel_id):
+"""def get_channel_video_id(current_channel_id):
     ## create a list to upload the videos ids
 
     videos_ids_list = []
@@ -99,15 +99,14 @@ def get_channel_video_id(current_channel_id):
     #print(videos_ids_list)
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')"""
 
-"""####  trying to get only 10 or 5 videos to use the api efficiently
+####  trying to get only 10 or 5 videos to use the api efficiently
 
 all_video_ids = []
 
 ## now to get the upload id
-#Call_Api_vd_id = youtube_access.channels().list(id = 'UC5HdAapbvqWN65GIqpWWL3Q',
-                                                    #part = 'contentDetails').execute()
+
 Call_Api_vd_id = youtube_access.channels().list(id = "UC5HdAapbvqWN65GIqpWWL3Q",
                                                 part ='contentDetails').execute()
 upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
@@ -118,7 +117,7 @@ get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId
 for index in range(len(get_video_ids['items'])):
     all_video_ids.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
 
-print(all_video_ids)"""
+#print(all_video_ids)
 
 #######################     FUNCTION FOR VIDEO DETAILS    #################################
 
@@ -178,7 +177,7 @@ def comment_details_videos(total_video_ids):
                                          Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
                 comment_meta_data_list.append(comment_meta_data)
 
-            print(comment_meta_data_list)
+            #print(comment_meta_data_list)
 
     except:
         pass
@@ -248,6 +247,8 @@ def playlist_meta_data(the_channel_id):
 
 playlists_meta_data_channel = playlist_meta_data('UC5HdAapbvqWN65GIqpWWL3Q')
 
+###############   connecting with mongoDb      ###############
 
-
+client = pymongo.MongoClient("mongodb+srv://agatha83painting:<D2fFKo5qqT0RXJGG>@cluster0.f57ra.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+data_base = client["youtube_data"]
 
