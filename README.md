@@ -35,7 +35,11 @@ NEXT STEP:
 
 ...........,
 
-## StreamLit
+## pip install pymongo (in terminal - command prompt)
+
+        # installed mongodb
+        # imported pymongo
+
 
 
 

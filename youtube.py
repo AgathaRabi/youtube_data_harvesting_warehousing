@@ -1,4 +1,4 @@
-#streamlit installed
+#  streamlit installed
 
 # print("Hello World")  # test
 
@@ -14,10 +14,13 @@
 # importing the above package
 
 from googleapiclient.discovery import build
+import pymongo
+
+##########################    API CONNECT   ##############################
 
 # setting the API key connection
 
-    # creating a function
+    # creating a function for API connect
 
 def Api_connect(): # in this, API id, API service name, API version # helps you to access yt details
     Api_Id = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU" # API key
@@ -30,22 +33,24 @@ def Api_connect(): # in this, API id, API service name, API version # helps you 
 
 youtube_access = Api_connect()
 
-## get channel's information
+#########################  FUNCTION FOR CHANNEL INFORMATION   ##########################
+
+## get channel's information through function 'get_channel_info'
 
 def get_channel_info(Id_Channel):
-    request = youtube_access.channels().list(
+    channel_info_request = youtube_access.channels().list(
                 part = "snippet, ContentDetails, statistics",
-                id = Id_Channel
-                #id = "UC5HdAapbvqWN65GIqpWWL3Q"
+                id = Id_Channel  # here we can call how many ever channels we need
+                #id = "UC5HdAapbvqWN65GIqpWWL3Q" # this is one channel
     )
-    response = request.execute()
+    channel_info_response = channel_info_request.execute()
     """print(response)
     print(response['items'])
     print(response['items'][0])
     print(response['items'][0]['id'])
     print(response['items'][0]['snippet']['title'])"""
 
-    for information in response['items']:  ### here you are getting only the details you need of channel.
+    for information in channel_info_response['items']:  ### here you are getting only the details you need of the channel.
         data = dict(Channel_Name = information['snippet']['title'],
                     Channel_Id = information['id'],
                     Subscribers_Count = information['statistics']['subscriberCount'],
@@ -57,11 +62,13 @@ def get_channel_info(Id_Channel):
 
 Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 
-
 #print(Channel_Details)
 
-## GET VIDEO IDS
-"""def get_channel_video_id(current_channel_id):
+##################################   FUNCTION FOR VIDEO IDS      ###############################
+
+## GET all VIDEO IDS
+
+def get_channel_video_id(current_channel_id):
     ## create a list to upload the videos ids
 
     videos_ids_list = []
@@ -92,9 +99,9 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
     #print(videos_ids_list)
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')"""
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
 
-####  trying to get only 10 or 5 videos to use the api efficiently
+"""####  trying to get only 10 or 5 videos to use the api efficiently
 
 all_video_ids = []
 
@@ -111,16 +118,16 @@ get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId
 for index in range(len(get_video_ids['items'])):
     all_video_ids.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
 
-print(all_video_ids)
+print(all_video_ids)"""
 
-
+#######################     FUNCTION FOR VIDEO DETAILS    #################################
 
 ### get that particular channel's videos' information, using the respective video ids
 
 def video_details_in_channel(obt_video_ids):
     video_meta_data_for_allVs = []
     for each_video_id in obt_video_ids:
-        request_video_information_api = youtube_access.videos().list(part = 'snippet, ContentDetails, statistics',
+        request_video_information_api = youtube_access.videos().list(part = 'snippet, contentDetails, statistics',
                                                                  id = each_video_id)
         get_video_details = request_video_information_api.execute()
     #print(get_video_details['items'])
@@ -150,6 +157,7 @@ def video_details_in_channel(obt_video_ids):
 
 video_details_of_channael = video_details_in_channel(all_video_ids)
 
+#####################      FUNCTION FOR COMMENT DETAILS  #################################
 
 ###  to get the comment details
 
@@ -181,6 +189,7 @@ comment_meta_data_video = comment_details_videos(all_video_ids)
 
 #print(comment_meta_data_video)
 
+############################   FUNCTION FOR PLAYLIST DETAILS   #################################
 
 ## to get details of playlist :(this set has only few playlists for limited API usage)
 
