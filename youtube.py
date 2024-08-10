@@ -61,7 +61,7 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 #print(Channel_Details)
 
 ## GET VIDEO IDS
-def get_channel_video_id(current_channel_id):
+"""def get_channel_video_id(current_channel_id):
     ## create a list to upload the videos ids
 
     videos_ids_list = []
@@ -92,9 +92,9 @@ def get_channel_video_id(current_channel_id):
     #print(videos_ids_list)
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')"""
 
-"""####  trying to get only 10 or 5 videos to use the api efficiently
+####  trying to get only 10 or 5 videos to use the api efficiently
 
 all_video_ids = []
 
@@ -106,16 +106,17 @@ Call_Api_vd_id = youtube_access.channels().list(id = "UC5HdAapbvqWN65GIqpWWL3Q",
 upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
 #print(upload_id_vd_id)
 
-get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id, maxResults = 5)
+get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id).execute() #, maxResults = 5)
 
 for index in range(len(get_video_ids['items'])):
     all_video_ids.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
 
-print(all_video_ids)"""
+print(all_video_ids)
 
 
 
 ### get that particular channel's videos' information, using the respective video ids
+
 def video_details_in_channel(obt_video_ids):
     video_meta_data_for_allVs = []
     for each_video_id in obt_video_ids:
@@ -138,7 +139,7 @@ def video_details_in_channel(obt_video_ids):
                                     Duration_Video = item['contentDetails']['duration'],
                                    Number_Views = item.get('viewCount'),
                                    Number_Comments = item.get('commentCount'),
-                                   Favourite_Count = item['statistics']['favouriteCount'],
+                                   Favourite_Count = item.get('favouriteCount'),
                                    Defenition = item['contentDetails']['definition'],
                                    Caption_Status = item['contentDetails']['caption'])
                                     ## above --- :  getting the specific details using slicing

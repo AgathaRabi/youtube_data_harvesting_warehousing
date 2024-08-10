@@ -1,3 +1,5 @@
+# streamlit installed
+
 # test
 
 # created API KEY
@@ -26,6 +28,14 @@ NEXT STEP:
         	Supposed to create function to get channel info.
            Mean time get a youtube channels' 'Channel_Id' (from 'about' --->  'share')
 
+
+......
+.........
+..........
+
+...........,
+
+## StreamLit
 
 
 
