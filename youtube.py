@@ -33,7 +33,9 @@ def Api_connect(): # in this, API id, API service name, API version # helps you 
 
 youtube_access = Api_connect()
 
-#########################  FUNCTION FOR CHANNEL INFORMATION   ##########################
+
+
+
 
 ## get channel's information through function 'get_channel_info'
 
@@ -61,10 +63,12 @@ def get_channel_info(Id_Channel):
     return data
 
 Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
-
 #print(Channel_Details)
 
-##################################   FUNCTION FOR VIDEO IDS      ###############################
+
+
+
+
 
 ## GET all VIDEO IDS
 
@@ -101,25 +105,34 @@ Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
 
 all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')"""
 
+
 ####  trying to get only 10 or 5 videos to use the api efficiently
+def get_channel_video_id(current_channel_id):
 
-all_video_ids = []
+    ## create a list to upload the videos ids
+    videos_ids_list = []
 
-## now to get the upload id
+    ## now to get the upload id
 
-Call_Api_vd_id = youtube_access.channels().list(id = "UC5HdAapbvqWN65GIqpWWL3Q",
-                                                part ='contentDetails').execute()
-upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
-#print(upload_id_vd_id)
+    Call_Api_vd_id = youtube_access.channels().list(id = current_channel_id,
+                                                    part ='contentDetails').execute()
+    upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
+    #print(upload_id_vd_id)
 
-get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id).execute() #, maxResults = 5)
+    get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id).execute() #, maxResults = 5)
 
-for index in range(len(get_video_ids['items'])):
-    all_video_ids.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
+    for index in range(len(get_video_ids['items'])):
+        videos_ids_list.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
 
+    return videos_ids_list
+
+all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
 #print(all_video_ids)
 
-#######################     FUNCTION FOR VIDEO DETAILS    #################################
+
+
+
+
 
 ### get that particular channel's videos' information, using the respective video ids
 
@@ -156,7 +169,10 @@ def video_details_in_channel(obt_video_ids):
 
 video_details_of_channael = video_details_in_channel(all_video_ids)
 
-#####################      FUNCTION FOR COMMENT DETAILS  #################################
+
+
+
+
 
 ###  to get the comment details
 
@@ -185,37 +201,12 @@ def comment_details_videos(total_video_ids):
     return comment_meta_data_list
 
 comment_meta_data_video = comment_details_videos(all_video_ids)
-
 #print(comment_meta_data_video)
 
-############################   FUNCTION FOR PLAYLIST DETAILS   #################################
 
-## to get details of playlist :(this set has only few playlists for limited API usage)
+#### the complete playlist :
 
-"""playlist_meta_data_list = []
-
-get_playlistDetails_req_api = youtube_access.playlists().list(
-                        part = 'snippet, contentDetails' ,
-                        channelId = 'UC5HdAapbvqWN65GIqpWWL3Q',
-                        maxResults = 5
-                        )
-get_playlist_details = get_playlistDetails_req_api.execute()
-
-for playlist_item in get_playlist_details['items']:
-
-    playlist_details = dict(Playlist_Id = playlist_item['id'],
-                            Title = playlist_item['snippet']['title'],
-                            Channel_Id = playlist_item['snippet']['channelId'],
-                            Channel_Name = playlist_item['snippet']['channelTitle'],
-                            Playlist_Published_At = playlist_item['snippet']['publishedAt'],
-                            Number_Videos_Playlist = playlist_item['contentDetails']['itemCount'])
-
-    playlist_meta_data_list.append(playlist_details)"""
-
-
-
-#### the complete playlist for the actual program:
-def playlist_meta_data(the_channel_id):
+"""def playlist_meta_data(the_channel_id):
 
     next_page_token_playLists = None
     playlist_meta_data_list = []
@@ -245,10 +236,81 @@ def playlist_meta_data(the_channel_id):
 
     return playlist_meta_data_list
 
-playlists_meta_data_channel = playlist_meta_data('UC5HdAapbvqWN65GIqpWWL3Q')
+playlists_meta_data_channel = playlist_meta_data('UC5HdAapbvqWN65GIqpWWL3Q')"""
 
-###############   connecting with mongoDb      ###############
+
+
+
+
+
+
+
+## to get details of playlist :(this set has only few playlists for limited API usage)
+
+def playlist_meta_data(the_channel_id):
+
+    playlist_meta_data_list = []
+
+    get_playlistDetails_req_api = youtube_access.playlists().list(
+                            part = 'snippet, contentDetails' ,
+                            channelId = the_channel_id, #'UC5HdAapbvqWN65GIqpWWL3Q',
+                            maxResults = 5
+                            )
+    get_playlist_details = get_playlistDetails_req_api.execute()
+
+    for playlist_item in get_playlist_details['items']:
+
+        playlist_details = dict(Playlist_Id = playlist_item['id'],
+                                Title = playlist_item['snippet']['title'],
+                                Channel_Id = playlist_item['snippet']['channelId'],
+                                Channel_Name = playlist_item['snippet']['channelTitle'],
+                                Playlist_Published_At = playlist_item['snippet']['publishedAt'],
+                                Number_Videos_Playlist = playlist_item['contentDetails']['itemCount'])
+
+        playlist_meta_data_list.append(playlist_details)
+
+    return playlist_meta_data_list
+
+playlists_meta_data_channel = playlist_meta_data('UC5HdAapbvqWN65GIqpWWL3Q')
+#print(playlists_meta_data_channel)
+
+
+#####   mongodb
+# connecting to mongodb
 
 client = pymongo.MongoClient("mongodb+srv://agatha83painting:<D2fFKo5qqT0RXJGG>@cluster0.f57ra.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 data_base = client["youtube_data"]
+
+
+# upload to mongodb
+# upload channel details
+
+# trial upload to mongo db
+
+db = client["youtube_data"]
+coll1 = db["channel_details"]
+x = ({"name" : "Leo", "year" : 2024})
+coll1.insert_one(x)
+
+
+"""def channel_meta_data_mdb(Id_Channel):
+    channel_mdata = get_channel_info(Id_Channel)
+    channel_video_ids = get_channel_video_id(Id_Channel)
+    videos_mdata = video_details_in_channel(channel_video_ids)
+    comment_mdata = comment_details_videos(channel_video_ids)0
+    playlists_mdata = playlist_meta_data(Id_Channel)
+
+    collection1 = data_base['youtube_channel_details']
+    collection1.insert_one({"Channel_Information": channel_mdata, "Playlist_Information": playlists_mdata,
+                            "Video_Info": videos_mdata, "Comment_Information": comment_mdata})
+
+    return "upload completed successfully"
+
+
+#insert_mdb = channel_meta_data_mdb("UC5HdAapbvqWN65GIqpWWL3Q")"""
+
+
+
+
+
 
