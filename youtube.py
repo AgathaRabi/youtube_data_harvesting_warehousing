@@ -278,7 +278,7 @@ playlists_meta_data_channel = playlist_meta_data('UC5HdAapbvqWN65GIqpWWL3Q')
 #####   mongodb
 # connecting to mongodb
 
-client = pymongo.MongoClient("mongodb+srv://agatha83painting:<D2fFKo5qqT0RXJGG>@cluster0.f57ra.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = pymongo.MongoClient("mongodb+srv://agatha83painting:D2fFKo5qqT0RXJGG@cluster0.f57ra.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 data_base = client["youtube_data"]
 
 
