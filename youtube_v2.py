@@ -16,6 +16,7 @@
 from googleapiclient.discovery import build
 import pymongo
 import psycopg2
+import pandas as pd
 
 ##########################    API CONNECT   ##############################
 
@@ -200,8 +201,6 @@ def comment_details_videos(total_video_ids):
     return comment_meta_data_list
 
 
-#print(comment_meta_data_video)
-
 
 #### the complete playlist :
 
@@ -239,11 +238,6 @@ playlists_meta_data_channel = playlist_meta_data('UChGd9JY4yMegY6PxqpBjpRA')"""
 
 
 
-
-
-
-
-
 ## to get details of playlist :(this set has only few playlists for limited API usage)
 
 def playlist_meta_data(the_channel_id):
@@ -251,7 +245,7 @@ def playlist_meta_data(the_channel_id):
     playlist_meta_data_list = []
 
     get_playlistDetails_req_api = youtube_access.playlists().list(
-                            part = 'snippet, contentDetails' ,
+                            part = 'snippet, contentDetails',
                             channelId = the_channel_id, #'UChGd9JY4yMegY6PxqpBjpRA',
                             maxResults = 5
                             )
@@ -301,10 +295,8 @@ def channel_meta_data_mdb(Id_Channel):
 
 
 
-
-#channel_ids_list = ['UChGd9JY4yMegY6PxqpBjpRA', 'UChGd9JY4yMegY6PxqpBjpRA', '..']
-
 youtube_access = Api_connect()
+
 channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
                     "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
                     "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
@@ -320,8 +312,76 @@ video_details_of_channel = video_details_in_channel(all_video_ids)
 comment_meta_data_video = comment_details_videos(all_video_ids)
 
 
+#### now postgresql -- connecting
+## table frame creation for channels
+
+my_data_base = psycopg2.connect(host = "localhost",
+                                user = "postgres",
+                                password = "phoenix275",
+                                database = "youtube_data",
+                                port = "5432")
+row_pointer_cursor = my_data_base.cursor()
+
+## for dropping tables in case of us needing to add or overwrite data
+
+drop_query = '''drop table if exists channels'''
+row_pointer_cursor.execute(drop_query)
+my_data_base.commit()
+
+try:
+    create_query = '''create table if not exists channels(Channel_Name varchar(100),
+                                                           Channel_Id varchar(80) primary key,
+                                                            Subscribers_Count bigint,
+                                                            Views_Channel bigint,
+                                                            Total_Videos int,
+                                                            Channel_Description text,
+                                                            Playlist_Id varchar(80))'''
+    row_pointer_cursor.execute(create_query)
+    my_data_base.commit()
+except:
+    print("channels tables are created")
 
 
+
+
+### getting channel table data from mongodb
+
+ch_data_list_from_mngdb = []
+data_base = client["youtube_data"]
+collection1 = data_base['youtube_channel_details']
+
+for ch_data in collection1.find({}, {"_id":0, "Channel_Information": 1}):
+    ch_data_list_from_mngdb.append(ch_data["Channel_Information"])
+data_frame = pd.DataFrame(ch_data_list_from_mngdb)
+
+
+
+### inserting channel data into postgresql channel table
+
+for index, row in data_frame.iterrows():
+    insert_query = '''insert into channels (Channel_Name,
+                                            Channel_Id,
+                                            Subscribers_Count,
+                                            Views_Channel,
+                                            Total_Videos,
+                                            Channel_Description,
+                                            Playlist_Id)
+                                            
+                                            values(%s, %s, %s, %s, %s, %s, %s)'''
+    value_ch = (row['Channel_Name'],
+             row['Channel_Id'],
+             row['Subscribers_Count'],
+             row['Views_Channel'],
+             row['Total_Videos'],
+             row['Channel_Description'],
+             row['Playlist_Id'])
+
+    try:
+        row_pointer_cursor.execute(insert_query, value_ch)
+        my_data_base.commit()
+
+    except:
+        print("channel values are already inserted")
 
 
 
