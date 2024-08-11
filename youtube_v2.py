@@ -301,7 +301,7 @@ channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
                     "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
                     "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
                     "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
-                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC81IYT8EN_pliDGCWaPkyxQ"]
+                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]
 for each_channel_id in channel_ids_list:
     Channel_Details = get_channel_info(each_channel_id)
     all_video_ids = get_channel_video_id(each_channel_id)
@@ -314,6 +314,8 @@ comment_meta_data_video = comment_details_videos(all_video_ids)
 
 #### now postgresql -- connecting
 ## table frame creation for channels
+
+#def channels_table():
 
 my_data_base = psycopg2.connect(host = "localhost",
                                 user = "postgres",
@@ -384,6 +386,66 @@ for index, row in data_frame.iterrows():
         print("channel values are already inserted")
 
 
+###  playlist tables and inserting data: ###################
+#def playlists_table():
+
+# creating playlist table in postgresql:
+my_data_base = psycopg2.connect(host = "localhost",
+                                user = "postgres",
+                                password = "phoenix275",
+                                database = "youtube_data",
+                                port = "5432")
+row_pointer_cursor = my_data_base.cursor()
+
+## for dropping tables in case of us needing to add or overwrite data
+drop_query = '''drop table if exists playlists'''
+row_pointer_cursor.execute(drop_query)
+my_data_base.commit()
+
+
+create_query = '''create table if not exists playlists(Playlist_Id varchar(100) primary key,
+                                                       Title varchar(100),
+                                                        Channel_Id varchar(100),
+                                                        Channel_Name varchar(100),
+                                                        Playlist_Published_At timestamp,
+                                                        Number_Videos_Playlist int)'''
+row_pointer_cursor.execute(create_query)
+my_data_base.commit()
+
+
+### getting playlists table data from mongodb
+plylst_data_list_from_mngdb = []
+data_base = client["youtube_data"]
+collection1 = data_base['youtube_channel_details']
+
+for plylst_data in collection1.find({}, {"_id":0, "Playlist_Information": 1}):
+    for i in range(len(plylst_data["Playlist_Information"])):
+        plylst_data_list_from_mngdb.append(plylst_data["Playlist_Information"][i])
+
+### converting to data frame
+data_frame_one = pd.DataFrame(plylst_data_list_from_mngdb)
+
+### inserting playlist data into postgresql channel table
+for index, row in data_frame_one.iterrows():
+    insert_query = '''insert into playlists (Playlist_Id,
+                                               Title,
+                                               Channel_Id,
+                                               Channel_Name,
+                                               Playlist_Published_At,
+                                               Number_Videos_Playlist)
+
+                                               values(%s,%s,%s,%s,%s,%s)'''
+    value_plylst = (row['Playlist_Id'],
+                row['Title'],
+                row['Channel_Id'],
+                row['Channel_Name'],
+                row['Playlist_Published_At'],
+                row['Number_Videos_Playlist'])
+
+
+    row_pointer_cursor.execute(insert_query, value_plylst)
+    my_data_base.commit()
+
 
 
 
@@ -421,4 +483,4 @@ for index, row in data_frame.iterrows():
 #  RAM TRB ACADEMY : "UC4c3Q2ym_hYei2cipr_KNaw"
 #  tamil business podcast:"UCy1lBBbXhtfzugF_LK2b6Yw"
 # MATHURALAYA SCHOOL OF DANCE : "UCqwLyQUYPBP_4CVh7AMxNOQ"
-# Upasana Dance Studio : "UC81IYT8EN_pliDGCWaPkyxQ"
+# Josephine Nithya : "UC7cgHgo42oYABKWabReHZyA"
