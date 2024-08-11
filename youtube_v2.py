@@ -32,7 +32,7 @@ def Api_connect(): # in this, API id, API service name, API version # helps you 
 
     return youtube_bld ## youtube_bld is the variable name
 
-youtube_access = Api_connect()
+
 
 
 
@@ -44,8 +44,7 @@ def get_channel_info(channel_id):
     channel_info_request = youtube_access.channels().list(
                 part = "snippet, ContentDetails, statistics",
                 id = channel_id  # here we can call how many ever channels we need
-                #id = "UC5HdAapbvqWN65GIqpWWL3Q" # this is one channel
-                # id = "UChGd9JY4yMegY6PxqpBjpRA" # this is another channel - science with sam
+
     )
     channel_info_response = channel_info_request.execute()
     """print(response)
@@ -63,15 +62,6 @@ def get_channel_info(channel_id):
                     Channel_Description = information['snippet']['description'],
                     Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
     return data
-
-Channel_Details = get_channel_info('UChGd9JY4yMegY6PxqpBjpRA')
-#print(Channel_Details)
-
-
-"""channel_ids_list = ['UChGd9JY4yMegY6PxqpBjpRA', 'UChGd9JY4yMegY6PxqpBjpRA', '..']
-
-for channel_id in channel_ids_list:
-    channel_details = get_channel_info(channel_id)"""
 
 
 
@@ -135,7 +125,7 @@ def get_channel_video_id(current_channel_id):
 
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UChGd9JY4yMegY6PxqpBjpRA')
+
 #print(all_video_ids)
 
 
@@ -164,10 +154,10 @@ def video_details_in_channel(obt_video_ids):
                                     Thumbnalis = item['snippet']['thumbnails']['default']['url'], # if 'thumbnails' in item['snippet'] else None,
                                     Description = item['snippet']['description'] if 'description' in item['snippet'] else None,
                                     Published_Date = item['snippet']['publishedAt'],
-                                    Duration_Video = item['contentDetails']['duration'],
+                                    Duration_Video = item['contentDetails'].get('duration'),
                                    Number_Views = item['statistics'].get('viewCount'),
                                    Number_Comments = item['statistics'].get('commentCount'),
-                                   Favourite_Count = item.get('favouriteCount'),
+                                   Favourite_Count = item['statistics'].get('favouriteCount'),
                                    Defenition = item['contentDetails']['definition'],
                                    Caption_Status = item['contentDetails']['caption'])
                                     ## above --- :  getting the specific details using slicing
@@ -176,7 +166,7 @@ def video_details_in_channel(obt_video_ids):
         # print(video_meta_data_list)
     return video_meta_data_for_allVs
 
-video_details_of_channael = video_details_in_channel(all_video_ids)
+
 
 
 
@@ -209,7 +199,7 @@ def comment_details_videos(total_video_ids):
 
     return comment_meta_data_list
 
-comment_meta_data_video = comment_details_videos(all_video_ids)
+
 #print(comment_meta_data_video)
 
 
@@ -280,7 +270,7 @@ def playlist_meta_data(the_channel_id):
 
     return playlist_meta_data_list
 
-playlists_meta_data_channel = playlist_meta_data('UChGd9JY4yMegY6PxqpBjpRA')
+
 #print(playlists_meta_data_channel)
 
 
@@ -309,24 +299,29 @@ def channel_meta_data_mdb(Id_Channel):
     return "upload completed successfully"
 
 
-insert_mdb = channel_meta_data_mdb("UChGd9JY4yMegY6PxqpBjpRA")
 
 
 
-### list of channels from which you want to get data
+#channel_ids_list = ['UChGd9JY4yMegY6PxqpBjpRA', 'UChGd9JY4yMegY6PxqpBjpRA', '..']
 
-#  charlie follows : "UC5HdAapbvqWN65GIqpWWL3Q"
-# science with sam : "UChGd9JY4yMegY6PxqpBjpRA"
-# ducatidreams     : "UCrgLTEHTvedDsxdQzSAFyDA"
-# HARISH THYGARAJAN : "UC5B0fGVovcbBJXQBx5kmRhQ"
-#  music academy of madras : "UCKmE9i2iW0KaqgSxVFYmZUw"
-# Apoorva Jayaraman :"UC21vCCoVSqgB7NzZjxB9weg"
-#  RAM TRB ACADEMY : "UC4c3Q2ym_hYei2cipr_KNaw"
-#  tamil business podcast:"UCy1lBBbXhtfzugF_LK2b6Yw"
-# MATHURALAYA SCHOOL OF DANCE : "UCqwLyQUYPBP_4CVh7AMxNOQ"
-# Upasana Dance Studio : "UC81IYT8EN_pliDGCWaPkyxQ"
+youtube_access = Api_connect()
+channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
+                    "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
+                    "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
+                    "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
+                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC81IYT8EN_pliDGCWaPkyxQ"]
+for each_channel_id in channel_ids_list:
+    Channel_Details = get_channel_info(each_channel_id)
+    all_video_ids = get_channel_video_id(each_channel_id)
+    playlists_meta_data_channel = playlist_meta_data(each_channel_id)
+    insert_mdb = channel_meta_data_mdb(each_channel_id)
 
-#for channel in range
+video_details_of_channel = video_details_in_channel(all_video_ids)
+comment_meta_data_video = comment_details_videos(all_video_ids)
+
+
+
+
 
 
 
@@ -355,3 +350,15 @@ insert_mdb = channel_meta_data_mdb("UChGd9JY4yMegY6PxqpBjpRA")
 # 9 Send to steam lit
 
 
+### list of channels from which you want to get data
+
+#  charlie follows : "UC5HdAapbvqWN65GIqpWWL3Q"
+# science with sam : "UChGd9JY4yMegY6PxqpBjpRA"
+# ducatidreams     : "UCrgLTEHTvedDsxdQzSAFyDA"
+# HARISH THYGARAJAN : "UC5B0fGVovcbBJXQBx5kmRhQ"
+#  music academy of madras : "UCKmE9i2iW0KaqgSxVFYmZUw"
+# Apoorva Jayaraman :"UC21vCCoVSqgB7NzZjxB9weg"
+#  RAM TRB ACADEMY : "UC4c3Q2ym_hYei2cipr_KNaw"
+#  tamil business podcast:"UCy1lBBbXhtfzugF_LK2b6Yw"
+# MATHURALAYA SCHOOL OF DANCE : "UCqwLyQUYPBP_4CVh7AMxNOQ"
+# Upasana Dance Studio : "UC81IYT8EN_pliDGCWaPkyxQ"
