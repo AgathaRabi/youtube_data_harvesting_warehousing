@@ -400,15 +400,15 @@ def playlists_details_table():
 
     ### converting to data frame
     data_frame_one = pd.DataFrame(plylst_data_list_from_mngdb)
-
+    print(data_frame_one)
     ### inserting playlist data into postgresql channel table
     for index, row in data_frame_one.iterrows():
         insert_query_plylst = '''insert into playlists (Playlist_Id,
-                                                   Title,
-                                                   Channel_Id,
-                                                   Channel_Name,
-                                                   Playlist_Published_At,
-                                                   Number_Videos_Playlist)
+                                                       Title,
+                                                       Channel_Id,
+                                                       Channel_Name,
+                                                       Playlist_Published_At,
+                                                       Number_Videos_Playlist)
     
                                                    values(%s,%s,%s,%s,%s,%s)'''
         value_plylst = (row['Playlist_Id'],
@@ -424,7 +424,7 @@ def playlists_details_table():
 
 
 
-###  video details tables and inserting data: ###################
+###  video details tables and inserting data:
 
 def videos_details_table():
 
@@ -666,8 +666,9 @@ if st.button("collect and store data"):  ## theses coming lines are to avoid rep
     ch_ids = []
     data_base = client["youtube_data"]
     collection1 = data_base['youtube_channel_details']
+
     for ch_data in collection1.find({}, {"_id": 0, "Channel_Information": 1}):
-        ch_ids.append(ch_data["Channel_Information"]["Channel_Id"])
+        ch_ids.append(ch_data["Channel_Information"]["Channel_Id"])## collecting all channel ids in mongo db into ch_ids
 
     if channel_id_streamlit in ch_ids:
         st.success("Channel details for the given Channel ID already exists")
@@ -676,8 +677,8 @@ if st.button("collect and store data"):  ## theses coming lines are to avoid rep
         st.success(insert_to_mdb)
 
 if st.button("Migrate to SQL"):
-    tables_frm_strmlt = all_tables()
-    st.success(tables_frm_strmlt)
+    tables_for_newid = all_tables()
+    st.success(tables_for_newid)
 
 #### radio
 
@@ -695,7 +696,6 @@ elif show_tables_list == "VIDEO DETAILS":
 
 elif show_tables_list == "COMMENT DETAILS":
     show_comment_details_table()
-
 
 
 ##   SQL Connection in streamlit for the list of speicified queries:
