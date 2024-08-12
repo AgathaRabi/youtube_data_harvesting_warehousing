@@ -149,17 +149,17 @@ def video_details_in_channel(obt_video_ids):
             #print(item['snippet'])
             video_meta_data = dict(Channel_Name = item['snippet']['channelTitle'],
                                     Channel_Id = item['snippet']['channelId'],
-                                    Video_Id = item['id'], video_title = item['snippet']['title'],
+                                    Video_Id = item['id'], Video_Title = item['snippet']['title'],
                                     Tags_Video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
                                     Number_Likes=item['statistics'].get('likeCount'),
-                                    Thumbnalis = item['snippet']['thumbnails']['default']['url'], # if 'thumbnails' in item['snippet'] else None,
+                                    Thumbnails = item['snippet']['thumbnails']['default']['url'], # if 'thumbnails' in item['snippet'] else None,
                                     Description = item['snippet']['description'] if 'description' in item['snippet'] else None,
                                     Published_Date = item['snippet']['publishedAt'],
                                     Duration_Video = item['contentDetails'].get('duration'),
                                    Number_Views = item['statistics'].get('viewCount'),
                                    Number_Comments = item['statistics'].get('commentCount'),
                                    Favourite_Count = item['statistics'].get('favouriteCount'),
-                                   Defenition = item['contentDetails']['definition'],
+                                   Definition = item['contentDetails']['definition'],
                                    Caption_Status = item['contentDetails']['caption'])
                                     ## above --- :  getting the specific details using slicing
             # number_likes=item['snippet']['statistics']['viewCount']
@@ -288,7 +288,7 @@ def channel_meta_data_mdb(Id_Channel):
 
     collection1 = data_base['youtube_channel_details']
     collection1.insert_one({"Channel_Information": channel_mdata, "Playlist_Information": playlists_mdata,
-                            "Video_Info": videos_mdata, "Comment_Information": comment_mdata})
+                            "Video_Information": videos_mdata, "Comment_Information": comment_mdata})
 
     return "upload completed successfully"
 
@@ -346,7 +346,7 @@ except:
 
 
 
-### getting channel table data from mongodb
+### getting channel table - data from mongodb
 
 ch_data_list_from_mngdb = []
 data_base = client["youtube_data"]
@@ -413,7 +413,7 @@ row_pointer_cursor.execute(create_query)
 my_data_base.commit()
 
 
-### getting playlists table data from mongodb
+### getting playlists table - data from mongodb
 plylst_data_list_from_mngdb = []
 data_base = client["youtube_data"]
 collection1 = data_base['youtube_channel_details']
@@ -427,7 +427,7 @@ data_frame_one = pd.DataFrame(plylst_data_list_from_mngdb)
 
 ### inserting playlist data into postgresql channel table
 for index, row in data_frame_one.iterrows():
-    insert_query = '''insert into playlists (Playlist_Id,
+    insert_query_plylst = '''insert into playlists (Playlist_Id,
                                                Title,
                                                Channel_Id,
                                                Channel_Name,
@@ -443,7 +443,159 @@ for index, row in data_frame_one.iterrows():
                 row['Number_Videos_Playlist'])
 
 
-    row_pointer_cursor.execute(insert_query, value_plylst)
+    row_pointer_cursor.execute(insert_query_plylst, value_plylst)
+    my_data_base.commit()
+
+
+
+
+
+
+###  video details tables and inserting data: ###################
+
+#def videos_details_table():
+
+# creating video details table in postgresql:
+my_data_base = psycopg2.connect(host = "localhost",
+                                user = "postgres",
+                                password = "phoenix275",
+                                database = "youtube_data",
+                                port = "5432")
+row_pointer_cursor = my_data_base.cursor()
+
+## for dropping tables in case of us needing to add or overwrite data
+drop_query = '''drop table if exists video_details'''
+row_pointer_cursor.execute(drop_query)
+my_data_base.commit()
+
+
+create_query = '''create table if not exists video_details(Channel_Name varchar(100),
+                                                       Channel_Id varchar(100),
+                                                        Video_Id varchar(80) primary key,
+                                                        Video_Title varchar(150),
+                                                        Tags_Video text,
+                                                        Number_Likes bigint,
+                                                        Thumbnails varchar(200),
+                                                        Description text,
+                                                        Published_Date timestamp,
+                                                        Duration_Video interval,
+                                                        Number_Views bigint,
+                                                        Number_Comments int,
+                                                        Favourite_Count int,
+                                                        Definition varchar(10),
+                                                        Caption_Status varchar(10))'''
+row_pointer_cursor.execute(create_query)
+my_data_base.commit()
+
+
+### getting video details table - data from mongodb
+video_data_list_from_mngdb = []
+data_base = client["youtube_data"]
+collection1 = data_base['youtube_channel_details']
+
+for video_data in collection1.find({}, {"_id":0, "Video_Information": 1}):
+    for j in range(len(video_data["Video_Information"])):
+        video_data_list_from_mngdb.append(video_data["Video_Information"][j])
+
+### converting to data frame
+data_frame_two = pd.DataFrame(video_data_list_from_mngdb)
+
+### inserting playlist data into postgresql channel table
+for index, row in data_frame_two.iterrows():
+    insert_query_vds = '''insert into video_details (Channel_Name,
+                                               Channel_Id,
+                                               Video_Id,
+                                               Video_Title,
+                                               Tags_Video,
+                                               Number_Likes,
+                                               Thumbnails,
+                                               Description,
+                                               Published_Date,
+                                               Duration_Video,
+                                               Number_Views,
+                                               Number_Comments,
+                                               Favourite_Count,
+                                               Definition,
+                                               Caption_Status)
+
+                                               values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+    value_videoDetails = (row['Channel_Name'],
+                            row['Channel_Id'],
+                            row['Video_Id'],
+                            row['Video_Title'],
+                            row['Tags_Video'],
+                            row['Number_Likes'],
+                            row['Thumbnails'],
+                            row['Description'],
+                            row['Published_Date'],
+                            row['Duration_Video'],
+                            row['Number_Views'],
+                            row['Number_Comments'],
+                            row['Favourite_Count'],
+                            row['Definition'],
+                            row['Caption_Status'])
+
+
+    row_pointer_cursor.execute(insert_query_vds, value_videoDetails)
+    my_data_base.commit()
+
+### comments tables and inserting data: ###################
+
+#def comments_details_table():
+
+# creating comment_details table in postgresql:
+#connecting
+my_data_base = psycopg2.connect(host = "localhost",
+                                user = "postgres",
+                                password = "phoenix275",
+                                database = "youtube_data",
+                                port = "5432")
+row_pointer_cursor = my_data_base.cursor()
+
+## for dropping tables in case of us needing to add or overwrite data
+drop_query = '''drop table if exists comment_details'''
+row_pointer_cursor.execute(drop_query)
+my_data_base.commit()
+
+
+create_query = '''create table if not exists comment_details(Comment_Gvn_Id varchar(100) primary key,
+                                                            Video_Id varchar(100),
+                                                            Comment_Text text,
+                                                            Comment_Author varchar(150),
+                                                            Comment_Published_Date timestamp)'''
+row_pointer_cursor.execute(create_query)
+my_data_base.commit()
+
+
+### getting comment details table - data from mongodb
+comment_data_list_from_mngdb = []
+data_base = client["youtube_data"]
+collection1 = data_base['youtube_channel_details']
+
+for comment_data in collection1.find({}, {"_id":0, "Comment_Information": 1}):
+    for k in range(len(comment_data["Comment_Information"])):
+        comment_data_list_from_mngdb.append(comment_data["Comment_Information"][k])
+
+### converting to data frame
+data_frame_three = pd.DataFrame(comment_data_list_from_mngdb)
+
+### inserting playlist data into postgresql channel table
+for index, row in data_frame_three.iterrows():
+    insert_query_commentdts = '''insert into comment_details (Comment_Gvn_Id,
+                                                            Video_Id,
+                                                            Comment_Text,
+                                                            Comment_Author,
+                                                            Comment_Published_Date)
+
+                                               values(%s, %s, %s, %s, %s)'''
+    value_commentdts = (row['Comment_Gvn_Id'],
+                        row['Video_Id'],
+                        row['Comment_Text'],
+                        row['Comment_Author'],
+                        row['Comment_Published_Date'])
+
+
+    row_pointer_cursor.execute(insert_query_commentdts, value_commentdts)
     my_data_base.commit()
 
 
