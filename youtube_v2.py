@@ -271,7 +271,7 @@ def channel_meta_data_mdb(Id_Channel):
 
     return "upload completed successfully"
 
-
+youtube_access = Api_connect()
 
 channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
                     "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
@@ -289,7 +289,7 @@ comment_meta_data_video = comment_details_videos(all_video_ids)
 
 #### now postgresql -- connecting
 ## table frame creation for channels
-youtube_access = Api_connect()
+
 
 def channels_details_table():
 
@@ -421,9 +421,6 @@ def playlists_details_table():
 
         row_pointer_cursor.execute(insert_query_plylst, value_plylst)
         my_data_base.commit()
-
-
-
 
 
 
@@ -570,10 +567,8 @@ def comments_details_table():
                             row['Comment_Author'],
                             row['Comment_Published_Date'])
 
-
         row_pointer_cursor.execute(insert_query_commentdts, value_commentdts)
         my_data_base.commit()
-
 
 #########------calling all tables using one function---------###########
 
@@ -587,8 +582,6 @@ def all_tables():
 
 all_tables_fn_call = all_tables()
 
-
-##
 
 #########now to display the tables  using streamlit######
 
