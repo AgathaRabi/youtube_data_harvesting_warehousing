@@ -11,14 +11,14 @@
 
 # downloading the package that would make the API key work
 
-# importing the above package
+# importing the needed package
 
 from googleapiclient.discovery import build
 import pymongo
 import psycopg2
 import pandas as pd
+import streamlit as st
 
-##########################    API CONNECT   ##############################
 
 # setting the API key connection
 
@@ -34,18 +34,12 @@ def Api_connect(): # in this, API id, API service name, API version # helps you 
     return youtube_bld ## youtube_bld is the variable name
 
 
-
-
-
-
-
 ## get channel's information through function 'get_channel_info'
 
 def get_channel_info(channel_id):
     channel_info_request = youtube_access.channels().list(
                 part = "snippet, ContentDetails, statistics",
                 id = channel_id  # here we can call how many ever channels we need
-
     )
     channel_info_response = channel_info_request.execute()
     """print(response)
@@ -63,11 +57,6 @@ def get_channel_info(channel_id):
                     Channel_Description = information['snippet']['description'],
                     Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
     return data
-
-
-
-
-
 
 
 ## GET all VIDEO IDS
@@ -129,11 +118,6 @@ def get_channel_video_id(current_channel_id):
 
 #print(all_video_ids)
 
-
-
-
-
-
 ### get that particular channel's videos' information, using the respective video ids
 
 def video_details_in_channel(obt_video_ids):
@@ -166,11 +150,6 @@ def video_details_in_channel(obt_video_ids):
             video_meta_data_for_allVs.append(video_meta_data)
         # print(video_meta_data_list)
     return video_meta_data_for_allVs
-
-
-
-
-
 
 
 
@@ -315,136 +294,136 @@ comment_meta_data_video = comment_details_videos(all_video_ids)
 #### now postgresql -- connecting
 ## table frame creation for channels
 
-#def channels_table():
+def channels_details_table():
 
-my_data_base = psycopg2.connect(host = "localhost",
-                                user = "postgres",
-                                password = "phoenix275",
-                                database = "youtube_data",
-                                port = "5432")
-row_pointer_cursor = my_data_base.cursor()
+    my_data_base = psycopg2.connect(host = "localhost",
+                                    user = "postgres",
+                                    password = "phoenix275",
+                                    database = "youtube_data",
+                                    port = "5432")
+    row_pointer_cursor = my_data_base.cursor()
 
-## for dropping tables in case of us needing to add or overwrite data
+    ## for dropping tables in case of us needing to add or overwrite data
 
-drop_query = '''drop table if exists channels'''
-row_pointer_cursor.execute(drop_query)
-my_data_base.commit()
-
-try:
-    create_query = '''create table if not exists channels(Channel_Name varchar(100),
-                                                           Channel_Id varchar(80) primary key,
-                                                            Subscribers_Count bigint,
-                                                            Views_Channel bigint,
-                                                            Total_Videos int,
-                                                            Channel_Description text,
-                                                            Playlist_Id varchar(80))'''
-    row_pointer_cursor.execute(create_query)
+    drop_query = '''drop table if exists channels'''
+    row_pointer_cursor.execute(drop_query)
     my_data_base.commit()
-except:
-    print("channels tables are created")
-
-
-
-
-### getting channel table - data from mongodb
-
-ch_data_list_from_mngdb = []
-data_base = client["youtube_data"]
-collection1 = data_base['youtube_channel_details']
-
-for ch_data in collection1.find({}, {"_id":0, "Channel_Information": 1}):
-    ch_data_list_from_mngdb.append(ch_data["Channel_Information"])
-data_frame = pd.DataFrame(ch_data_list_from_mngdb)
-
-
-
-### inserting channel data into postgresql channel table
-
-for index, row in data_frame.iterrows():
-    insert_query = '''insert into channels (Channel_Name,
-                                            Channel_Id,
-                                            Subscribers_Count,
-                                            Views_Channel,
-                                            Total_Videos,
-                                            Channel_Description,
-                                            Playlist_Id)
-                                            
-                                            values(%s, %s, %s, %s, %s, %s, %s)'''
-    value_ch = (row['Channel_Name'],
-             row['Channel_Id'],
-             row['Subscribers_Count'],
-             row['Views_Channel'],
-             row['Total_Videos'],
-             row['Channel_Description'],
-             row['Playlist_Id'])
 
     try:
-        row_pointer_cursor.execute(insert_query, value_ch)
+        create_query = '''create table if not exists channels(Channel_Name varchar(100),
+                                                               Channel_Id varchar(80) primary key,
+                                                                Subscribers_Count bigint,
+                                                                Views_Channel bigint,
+                                                                Total_Videos int,
+                                                                Channel_Description text,
+                                                                Playlist_Id varchar(80))'''
+        row_pointer_cursor.execute(create_query)
         my_data_base.commit()
-
     except:
-        print("channel values are already inserted")
+        print("channels tables are created")
+
+
+
+
+    ### getting channel table - data from mongodb
+
+    ch_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for ch_data in collection1.find({}, {"_id":0, "Channel_Information": 1}):
+        ch_data_list_from_mngdb.append(ch_data["Channel_Information"])
+    data_frame_zero = pd.DataFrame(ch_data_list_from_mngdb)
+
+
+
+    ### inserting channel data into postgresql channel table
+
+    for index, row in data_frame_zero.iterrows():
+        insert_query = '''insert into channels (Channel_Name,
+                                                Channel_Id,
+                                                Subscribers_Count,
+                                                Views_Channel,
+                                                Total_Videos,
+                                                Channel_Description,
+                                                Playlist_Id)
+                                                
+                                                values(%s, %s, %s, %s, %s, %s, %s)'''
+        value_ch = (row['Channel_Name'],
+                 row['Channel_Id'],
+                 row['Subscribers_Count'],
+                 row['Views_Channel'],
+                 row['Total_Videos'],
+                 row['Channel_Description'],
+                 row['Playlist_Id'])
+
+        try:
+            row_pointer_cursor.execute(insert_query, value_ch)
+            my_data_base.commit()
+
+        except:
+            print("channel values are already inserted")
 
 
 ###  playlist tables and inserting data: ###################
-#def playlists_table():
+def playlists_details_table():
 
-# creating playlist table in postgresql:
-my_data_base = psycopg2.connect(host = "localhost",
-                                user = "postgres",
-                                password = "phoenix275",
-                                database = "youtube_data",
-                                port = "5432")
-row_pointer_cursor = my_data_base.cursor()
+    # creating playlist table in postgresql:
+    my_data_base = psycopg2.connect(host = "localhost",
+                                    user = "postgres",
+                                    password = "phoenix275",
+                                    database = "youtube_data",
+                                    port = "5432")
+    row_pointer_cursor = my_data_base.cursor()
 
-## for dropping tables in case of us needing to add or overwrite data
-drop_query = '''drop table if exists playlists'''
-row_pointer_cursor.execute(drop_query)
-my_data_base.commit()
-
-
-create_query = '''create table if not exists playlists(Playlist_Id varchar(100) primary key,
-                                                       Title varchar(100),
-                                                        Channel_Id varchar(100),
-                                                        Channel_Name varchar(100),
-                                                        Playlist_Published_At timestamp,
-                                                        Number_Videos_Playlist int)'''
-row_pointer_cursor.execute(create_query)
-my_data_base.commit()
-
-
-### getting playlists table - data from mongodb
-plylst_data_list_from_mngdb = []
-data_base = client["youtube_data"]
-collection1 = data_base['youtube_channel_details']
-
-for plylst_data in collection1.find({}, {"_id":0, "Playlist_Information": 1}):
-    for i in range(len(plylst_data["Playlist_Information"])):
-        plylst_data_list_from_mngdb.append(plylst_data["Playlist_Information"][i])
-
-### converting to data frame
-data_frame_one = pd.DataFrame(plylst_data_list_from_mngdb)
-
-### inserting playlist data into postgresql channel table
-for index, row in data_frame_one.iterrows():
-    insert_query_plylst = '''insert into playlists (Playlist_Id,
-                                               Title,
-                                               Channel_Id,
-                                               Channel_Name,
-                                               Playlist_Published_At,
-                                               Number_Videos_Playlist)
-
-                                               values(%s,%s,%s,%s,%s,%s)'''
-    value_plylst = (row['Playlist_Id'],
-                row['Title'],
-                row['Channel_Id'],
-                row['Channel_Name'],
-                row['Playlist_Published_At'],
-                row['Number_Videos_Playlist'])
-
-
-    row_pointer_cursor.execute(insert_query_plylst, value_plylst)
+    ## for dropping tables in case of us needing to add or overwrite data
+    drop_query = '''drop table if exists playlists'''
+    row_pointer_cursor.execute(drop_query)
     my_data_base.commit()
+
+
+    create_query = '''create table if not exists playlists(Playlist_Id varchar(100) primary key,
+                                                           Title varchar(100),
+                                                            Channel_Id varchar(100),
+                                                            Channel_Name varchar(100),
+                                                            Playlist_Published_At timestamp,
+                                                            Number_Videos_Playlist int)'''
+    row_pointer_cursor.execute(create_query)
+    my_data_base.commit()
+
+
+    ### getting playlists table - data from mongodb
+    plylst_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for plylst_data in collection1.find({}, {"_id":0, "Playlist_Information": 1}):
+        for i in range(len(plylst_data["Playlist_Information"])):
+            plylst_data_list_from_mngdb.append(plylst_data["Playlist_Information"][i])
+
+    ### converting to data frame
+    data_frame_one = pd.DataFrame(plylst_data_list_from_mngdb)
+
+    ### inserting playlist data into postgresql channel table
+    for index, row in data_frame_one.iterrows():
+        insert_query_plylst = '''insert into playlists (Playlist_Id,
+                                                   Title,
+                                                   Channel_Id,
+                                                   Channel_Name,
+                                                   Playlist_Published_At,
+                                                   Number_Videos_Playlist)
+    
+                                                   values(%s,%s,%s,%s,%s,%s)'''
+        value_plylst = (row['Playlist_Id'],
+                    row['Title'],
+                    row['Channel_Id'],
+                    row['Channel_Name'],
+                    row['Playlist_Published_At'],
+                    row['Number_Videos_Playlist'])
+
+
+        row_pointer_cursor.execute(insert_query_plylst, value_plylst)
+        my_data_base.commit()
 
 
 
@@ -453,98 +432,286 @@ for index, row in data_frame_one.iterrows():
 
 ###  video details tables and inserting data: ###################
 
-#def videos_details_table():
+def videos_details_table():
 
-# creating video details table in postgresql:
-my_data_base = psycopg2.connect(host = "localhost",
-                                user = "postgres",
-                                password = "phoenix275",
-                                database = "youtube_data",
-                                port = "5432")
-row_pointer_cursor = my_data_base.cursor()
+    # creating video details table in postgresql:
+    my_data_base = psycopg2.connect(host = "localhost",
+                                    user = "postgres",
+                                    password = "phoenix275",
+                                    database = "youtube_data",
+                                    port = "5432")
+    row_pointer_cursor = my_data_base.cursor()
 
-## for dropping tables in case of us needing to add or overwrite data
-drop_query = '''drop table if exists video_details'''
-row_pointer_cursor.execute(drop_query)
-my_data_base.commit()
-
-
-create_query = '''create table if not exists video_details(Channel_Name varchar(100),
-                                                       Channel_Id varchar(100),
-                                                        Video_Id varchar(80) primary key,
-                                                        Video_Title varchar(150),
-                                                        Tags_Video text,
-                                                        Number_Likes bigint,
-                                                        Thumbnails varchar(200),
-                                                        Description text,
-                                                        Published_Date timestamp,
-                                                        Duration_Video interval,
-                                                        Number_Views bigint,
-                                                        Number_Comments int,
-                                                        Favourite_Count int,
-                                                        Definition varchar(10),
-                                                        Caption_Status varchar(10))'''
-row_pointer_cursor.execute(create_query)
-my_data_base.commit()
+    ## for dropping tables in case of us needing to add or overwrite data
+    drop_query = '''drop table if exists video_details'''
+    row_pointer_cursor.execute(drop_query)
+    my_data_base.commit()
 
 
-### getting video details table - data from mongodb
-video_data_list_from_mngdb = []
-data_base = client["youtube_data"]
-collection1 = data_base['youtube_channel_details']
+    create_query = '''create table if not exists video_details(Channel_Name varchar(100),
+                                                           Channel_Id varchar(100),
+                                                            Video_Id varchar(80) primary key,
+                                                            Video_Title varchar(150),
+                                                            Tags_Video text,
+                                                            Number_Likes bigint,
+                                                            Thumbnails varchar(200),
+                                                            Description text,
+                                                            Published_Date timestamp,
+                                                            Duration_Video interval,
+                                                            Number_Views bigint,
+                                                            Number_Comments int,
+                                                            Favourite_Count int,
+                                                            Definition varchar(10),
+                                                            Caption_Status varchar(10))'''
+    row_pointer_cursor.execute(create_query)
+    my_data_base.commit()
 
-for video_data in collection1.find({}, {"_id":0, "Video_Information": 1}):
-    for j in range(len(video_data["Video_Information"])):
-        video_data_list_from_mngdb.append(video_data["Video_Information"][j])
 
-### converting to data frame
-data_frame_two = pd.DataFrame(video_data_list_from_mngdb)
+    ### getting video details table - data from mongodb
+    video_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
 
-### inserting playlist data into postgresql channel table
-for index, row in data_frame_two.iterrows():
-    insert_query_vds = '''insert into video_details (Channel_Name,
-                                               Channel_Id,
-                                               Video_Id,
-                                               Video_Title,
-                                               Tags_Video,
-                                               Number_Likes,
-                                               Thumbnails,
-                                               Description,
-                                               Published_Date,
-                                               Duration_Video,
-                                               Number_Views,
-                                               Number_Comments,
-                                               Favourite_Count,
-                                               Definition,
-                                               Caption_Status)
+    for video_data in collection1.find({}, {"_id":0, "Video_Information": 1}):
+        for j in range(len(video_data["Video_Information"])):
+            video_data_list_from_mngdb.append(video_data["Video_Information"][j])
 
-                                               values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-    value_videoDetails = (row['Channel_Name'],
-                            row['Channel_Id'],
+    ### converting to data frame
+    data_frame_two = pd.DataFrame(video_data_list_from_mngdb)
+
+    ### inserting playlist data into postgresql channel table
+    for index, row in data_frame_two.iterrows():
+        insert_query_vds = '''insert into video_details (Channel_Name,
+                                                   Channel_Id,
+                                                   Video_Id,
+                                                   Video_Title,
+                                                   Tags_Video,
+                                                   Number_Likes,
+                                                   Thumbnails,
+                                                   Description,
+                                                   Published_Date,
+                                                   Duration_Video,
+                                                   Number_Views,
+                                                   Number_Comments,
+                                                   Favourite_Count,
+                                                   Definition,
+                                                   Caption_Status)
+    
+                                                   values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+        value_videoDetails = (row['Channel_Name'],
+                                row['Channel_Id'],
+                                row['Video_Id'],
+                                row['Video_Title'],
+                                row['Tags_Video'],
+                                row['Number_Likes'],
+                                row['Thumbnails'],
+                                row['Description'],
+                                row['Published_Date'],
+                                row['Duration_Video'],
+                                row['Number_Views'],
+                                row['Number_Comments'],
+                                row['Favourite_Count'],
+                                row['Definition'],
+                                row['Caption_Status'])
+
+
+        row_pointer_cursor.execute(insert_query_vds, value_videoDetails)
+        my_data_base.commit()
+
+############ comments tables and inserting data: ###################
+
+def comments_details_table():
+
+    # creating comment_details table in postgresql:
+    #connecting
+    my_data_base = psycopg2.connect(host = "localhost",
+                                    user = "postgres",
+                                    password = "phoenix275",
+                                    database = "youtube_data",
+                                    port = "5432")
+    row_pointer_cursor = my_data_base.cursor()
+
+    ## for dropping tables in case of us needing to add or overwrite data
+    drop_query = '''drop table if exists comment_details'''
+    row_pointer_cursor.execute(drop_query)
+    my_data_base.commit()
+
+
+    create_query = '''create table if not exists comment_details(Comment_Gvn_Id varchar(100) primary key,
+                                                                Video_Id varchar(100),
+                                                                Comment_Text text,
+                                                                Comment_Author varchar(150),
+                                                                Comment_Published_Date timestamp)'''
+    row_pointer_cursor.execute(create_query)
+    my_data_base.commit()
+
+
+    ### getting comment details table - data from mongodb
+    comment_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for comment_data in collection1.find({}, {"_id":0, "Comment_Information": 1}):
+        for k in range(len(comment_data["Comment_Information"])):
+            comment_data_list_from_mngdb.append(comment_data["Comment_Information"][k])
+
+    ### converting to data frame
+    data_frame_three = pd.DataFrame(comment_data_list_from_mngdb)
+
+    ### inserting playlist data into postgresql channel table
+    for index, row in data_frame_three.iterrows():
+        insert_query_commentdts = '''insert into comment_details (Comment_Gvn_Id,
+                                                                Video_Id,
+                                                                Comment_Text,
+                                                                Comment_Author,
+                                                                Comment_Published_Date)
+    
+                                                   values(%s, %s, %s, %s, %s)'''
+        value_commentdts = (row['Comment_Gvn_Id'],
                             row['Video_Id'],
-                            row['Video_Title'],
-                            row['Tags_Video'],
-                            row['Number_Likes'],
-                            row['Thumbnails'],
-                            row['Description'],
-                            row['Published_Date'],
-                            row['Duration_Video'],
-                            row['Number_Views'],
-                            row['Number_Comments'],
-                            row['Favourite_Count'],
-                            row['Definition'],
-                            row['Caption_Status'])
+                            row['Comment_Text'],
+                            row['Comment_Author'],
+                            row['Comment_Published_Date'])
 
 
-    row_pointer_cursor.execute(insert_query_vds, value_videoDetails)
-    my_data_base.commit()
+        row_pointer_cursor.execute(insert_query_commentdts, value_commentdts)
+        my_data_base.commit()
 
-### comments tables and inserting data: ###################
 
-#def comments_details_table():
+#########------calling all tables using one function---------###########
 
-# creating comment_details table in postgresql:
-#connecting
+def all_tables():
+    channels_details_table()
+    playlists_details_table()
+    videos_details_table()
+    comments_details_table()
+
+    return "tables created successfully"
+
+all_tables_fn_call = all_tables()
+
+
+##
+
+#########now to display the tables  using streamlit######
+
+## fns for streamlit:
+
+def show_channel_details_table():
+    ch_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for ch_data in collection1.find({}, {"_id": 0, "Channel_Information": 1}):
+        ch_data_list_from_mngdb.append(ch_data["Channel_Information"])
+    ### converting to data frame
+    data_frame_zero = st.dataframe(ch_data_list_from_mngdb)
+
+    return data_frame_zero
+
+
+def show_playlist_details_table():
+
+    ### getting playlists table - data from mongodb
+    plylst_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for plylst_data in collection1.find({}, {"_id": 0, "Playlist_Information": 1}):
+        for i in range(len(plylst_data["Playlist_Information"])):
+            plylst_data_list_from_mngdb.append(plylst_data["Playlist_Information"][i])
+    ### converting to data frame
+    data_frame_one = st.dataframe(plylst_data_list_from_mngdb)
+
+    return data_frame_one
+
+def show_video_details_table():
+
+    ### getting video details table - data from mongodb
+    video_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for video_data in collection1.find({}, {"_id": 0, "Video_Information": 1}):
+        for j in range(len(video_data["Video_Information"])):
+            video_data_list_from_mngdb.append(video_data["Video_Information"][j])
+
+    ### converting to data frame
+    data_frame_two = st.dataframe(video_data_list_from_mngdb)
+
+    return data_frame_two
+
+
+def show_comment_details_table():
+
+    ### getting comment details table - data from mongodb
+    comment_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+
+    for comment_data in collection1.find({}, {"_id": 0, "Comment_Information": 1}):
+        for k in range(len(comment_data["Comment_Information"])):
+            comment_data_list_from_mngdb.append(comment_data["Comment_Information"][k])
+
+    ### converting to data frame
+    data_frame_three = st.dataframe(comment_data_list_from_mngdb)
+
+    return data_frame_three
+
+
+##### stream lit ------ VISUAL PAGE---###########
+
+with st.sidebar:
+    st.title(":blue[YOUTUBE DATA HARVESTING AND WAREHOUSING]")
+    st.header("Skill Take Away")
+    st.caption("Python Scripting")
+    st.caption("Data Collection")
+    st.caption("MongoDB")
+    st.caption("API Integration")
+    st.caption("Data Management using MongoDB and SQL")
+
+channel_id_streamlit = st.text_input("Enter the Channel ID")
+
+if st.button("collect and store data"):  ## theses coming lines are to avoid repetitive channel id data in MongoDB
+    ch_ids = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']
+    for ch_data in collection1.find({}, {"_id": 0, "Channel_Information": 1}):
+        ch_ids.append(ch_data["Channel_Information"]["Channel_Id"])
+
+    if channel_id_streamlit in ch_ids:
+        st.success("Channel details for the given Channel ID already exists")
+    else:
+        insert_to_mdb = channel_meta_data_mdb(channel_id_streamlit) # if not repetitive insert into MongoDB using already created function(channel_meta_data_mdb)
+        st.success(insert_to_mdb)
+
+if st.button("Migrate to SQL"):
+    tables_frm_strmlt = all_tables()
+    st.success(tables_frm_strmlt)
+
+#### radio
+
+show_tables_list = st.radio("SELECT THE TABLE FOR VIEW",("CHANNEL DETAILS", "PLAYLIST DETAILS",
+                                                         "VIDEO DETAILS", "COMMENT DETAILS"))
+
+## appropriate show table functions to be called for the choice made:
+if show_tables_list == "CHANNEL DETAILS":
+    show_channel_details_table()
+
+elif show_tables_list == "PLAYLIST DETAILS":
+    show_playlist_details_table()
+
+elif show_tables_list == "VIDEO DETAILS":
+    show_video_details_table()
+
+elif show_tables_list == "COMMENT DETAILS":
+    show_comment_details_table()
+
+
+
+##   SQL Connection in streamlit for the list of speicified queries:
+
+## sql connection
 my_data_base = psycopg2.connect(host = "localhost",
                                 user = "postgres",
                                 password = "phoenix275",
@@ -552,54 +719,16 @@ my_data_base = psycopg2.connect(host = "localhost",
                                 port = "5432")
 row_pointer_cursor = my_data_base.cursor()
 
-## for dropping tables in case of us needing to add or overwrite data
-drop_query = '''drop table if exists comment_details'''
-row_pointer_cursor.execute(drop_query)
-my_data_base.commit()
-
-
-create_query = '''create table if not exists comment_details(Comment_Gvn_Id varchar(100) primary key,
-                                                            Video_Id varchar(100),
-                                                            Comment_Text text,
-                                                            Comment_Author varchar(150),
-                                                            Comment_Published_Date timestamp)'''
-row_pointer_cursor.execute(create_query)
-my_data_base.commit()
-
-
-### getting comment details table - data from mongodb
-comment_data_list_from_mngdb = []
-data_base = client["youtube_data"]
-collection1 = data_base['youtube_channel_details']
-
-for comment_data in collection1.find({}, {"_id":0, "Comment_Information": 1}):
-    for k in range(len(comment_data["Comment_Information"])):
-        comment_data_list_from_mngdb.append(comment_data["Comment_Information"][k])
-
-### converting to data frame
-data_frame_three = pd.DataFrame(comment_data_list_from_mngdb)
-
-### inserting playlist data into postgresql channel table
-for index, row in data_frame_three.iterrows():
-    insert_query_commentdts = '''insert into comment_details (Comment_Gvn_Id,
-                                                            Video_Id,
-                                                            Comment_Text,
-                                                            Comment_Author,
-                                                            Comment_Published_Date)
-
-                                               values(%s, %s, %s, %s, %s)'''
-    value_commentdts = (row['Comment_Gvn_Id'],
-                        row['Video_Id'],
-                        row['Comment_Text'],
-                        row['Comment_Author'],
-                        row['Comment_Published_Date'])
-
-
-    row_pointer_cursor.execute(insert_query_commentdts, value_commentdts)
-    my_data_base.commit()
-
-
-
+question = st.selectbox("Select your Question",("1. All the videos and the Channel name",
+                                                "2. Channels with the most number of videos",
+                                                "3. 10 most viewed videos",
+                                                "4. Comments in each channel",
+                                                "5. Videos with highest likes"
+                                                "6. Likes of all videos",
+                                                "7. Views of each channel",
+                                                "8. Videos published in the year of 2022",
+                                                "9. average duration of videos in each channel",
+                                                "10. videos with the highest number of comments"))
 
 # import
 
@@ -636,3 +765,14 @@ for index, row in data_frame_three.iterrows():
 #  tamil business podcast:"UCy1lBBbXhtfzugF_LK2b6Yw"
 # MATHURALAYA SCHOOL OF DANCE : "UCqwLyQUYPBP_4CVh7AMxNOQ"
 # Josephine Nithya : "UC7cgHgo42oYABKWabReHZyA"
+
+#"""("1. What are the names of all the videos and their corresponding channels?",
+#                                                "2. Which channels have the most number of videos, and how many videos do they have?" ,
+#                                                "3. What are the top 10 most viewed videos and their respective channels?",
+#                                                "4. How many comments were made on each video, and what are their  corresponding video names?",
+#                                                "5. Which videos have the highest number of likes, and what are their corresponding channel names?"
+#                                                "6. What is the total number of likes and dislikes for each video, and what are their corresponding video names?",
+#                                                "7. What is the total number of views for each channel, and what are their  corresponding channel names?",
+#                                                "8. What are the names of all the channels that have published videos in the year  2022?",
+#                                                "9. What is the average duration of all videos in each channel, and what are their corresponding channel names?",
+#                                                "10. Which videos have the highest number of comments, and what are their  corresponding channel names?")"""
