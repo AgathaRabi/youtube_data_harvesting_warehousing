@@ -3,7 +3,7 @@
 # print("Hello World")  # test
 
 #  API KEY CREATED - IS BELOW
-# "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
+# "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # next step is accessing data from you-tube
     # for that we need to write a function
@@ -24,7 +24,7 @@ import psycopg2
     # creating a function for API connect
 
 def Api_connect(): # in this, API id, API service name, API version # helps you to access yt details
-    Api_Id = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU" # API key
+    Api_Id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx" # API key
     Api_Service_Name = "youtube"  # service name
     Api_Version = "v3"
 
@@ -64,7 +64,7 @@ def get_channel_info(channel_id):
                     Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
     return data
 
-Channel_Details = get_channel_info('UC5HdAapbvqWN65GIqpWWL3Q')
+Channel_Details = get_channel_info('UCQref5u7Hm10bAHWSD_sXSQ')
 #print(Channel_Details)
 
 
@@ -135,7 +135,7 @@ def get_channel_video_id(current_channel_id):
 
     return videos_ids_list
 
-all_video_ids = get_channel_video_id('UC5HdAapbvqWN65GIqpWWL3Q')
+all_video_ids = get_channel_video_id('UCQref5u7Hm10bAHWSD_sXSQ')
 
 print(all_video_ids)
 
@@ -150,7 +150,7 @@ print(all_video_ids)
     video_meta_data_for_allVs = []"""
 #for each_video_id in obt_video_ids:
 request_video_information_api = youtube_access.videos().list(part = 'snippet, contentDetails, statistics',
-                                                         id = "3gq9HMtLGM0")
+                                                         id = "lN1ouwdGVLk")
 get_video_details = request_video_information_api.execute()
 print(get_video_details['items'][0]['statistics'])
 #print(get_video_details['items'][0]['snippet']['tags'])
