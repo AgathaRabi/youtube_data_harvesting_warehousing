@@ -522,202 +522,215 @@ for each_channel_id in channel_ids_list:
 
 ##### stream lit ------ VISUAL PAGE---###########
 
-with st.sidebar:
-    st.title(":blue[YOUTUBE DATA HARVESTING AND WAREHOUSING]")
-    st.header("Skill Take Away")
-    st.caption("Python Scripting")
-    st.caption("Data Collection")
-    st.caption("MongoDB")
-    st.caption("API Integration")
-    st.caption("Data Management using MongoDB and SQL")
+st.title("YOUTUBE DATA HARVESTING AND WAREHOUSING")
+st.sidebar.title("VIEW")
+page = st.sidebar.radio("click on", ["Home", "Channel Data", "I/p Channel Id", "sql Queries", "My outcomes"])
+if page == "Home":
+    st.write("Welcome to the homepage!")
+    st.write("Here, a simple visualization of the data frames is attempted")
 
-channel_id_streamlit = st.text_input("Enter the Channel ID")
+elif page == "Channel Data":
+    show_tables_list = st.radio("SELECT THE TABLE FOR VIEW",
+                                ("CHANNEL DETAILS", "PLAYLIST DETAILS", "VIDEO DETAILS", "COMMENT DETAILS"))
 
-if st.button("collect and store data"):  ## theses coming lines are to avoid repetitive channel id data in MongoDB
-    ch_ids = []
-    data_base = client["youtube_data"]
-    collection1 = data_base['youtube_channel_details']
+    ## appropriate show table functions to be called for the choice made:
+    if show_tables_list == "CHANNEL DETAILS":
+        show_channel_details_table()
 
-    for ch_data in collection1.find({}, {"_id": 0, "Channel_Information": 1}):
-        ch_ids.append(ch_data["Channel_Information"]["Channel_Id"])## collecting all channel ids in mongo db into ch_ids
+    elif show_tables_list == "PLAYLIST DETAILS":
+        show_playlist_details_table()
 
-    if channel_id_streamlit in ch_ids:
-        st.success("Channel details for the given Channel ID already exists")
-    else:
-        insert_to_mdb = channel_meta_data_mdb(channel_id_streamlit) # if not repetitive insert into MongoDB using already created function(channel_meta_data_mdb)
-        st.success(insert_to_mdb)
+    elif show_tables_list == "VIDEO DETAILS":
+        show_video_details_table()
 
-if st.button("Migrate to SQL"):
-    tables_for_newid = all_tables()
-    st.success(tables_for_newid)
+    elif show_tables_list == "COMMENT DETAILS":
+        show_comment_details_table()
 
-#### radio
+elif page == "I/p Channel Id":
+    channel_id_streamlit = st.text_input("Enter the Channel ID")
 
-show_tables_list = st.radio("SELECT THE TABLE FOR VIEW",("CHANNEL DETAILS", "PLAYLIST DETAILS", "VIDEO DETAILS", "COMMENT DETAILS"))
+    if st.button("collect and store data"):  ## theses coming lines are to avoid repetitive channel id data in MongoDB
+        ch_ids = []
+        data_base = client["youtube_data"]
+        collection1 = data_base['youtube_channel_details']
 
-## appropriate show table functions to be called for the choice made:
-if show_tables_list == "CHANNEL DETAILS":
-    show_channel_details_table()
+        for ch_data in collection1.find({}, {"_id": 0, "Channel_Information": 1}):
+            ch_ids.append(
+                ch_data["Channel_Information"]["Channel_Id"])  ## collecting all channel ids in mongo db into ch_ids
 
-elif show_tables_list == "PLAYLIST DETAILS":
-    show_playlist_details_table()
+        if channel_id_streamlit in ch_ids:
+            st.success("Channel details for the given Channel ID already exists")
+        else:
+            insert_to_mdb = channel_meta_data_mdb(
+                channel_id_streamlit)  # if not repetitive insert into MongoDB using already created function(channel_meta_data_mdb)
+            st.success(insert_to_mdb)
 
-elif show_tables_list == "VIDEO DETAILS":
-    show_video_details_table()
+    if st.button("Migrate to SQL"):
+        tables_for_newid = all_tables()
+        st.success(tables_for_newid)
 
-elif show_tables_list == "COMMENT DETAILS":
-    show_comment_details_table()
+elif page == "sql Queries":
 
+    my_data_base = psycopg2.connect(host="localhost",
+                                    user="postgres",
+                                    password="phoenix275",
+                                    database="youtube_data",
+                                    port="5432")
+    row_pointer_cursor = my_data_base.cursor()
 
-##   SQL Connection in streamlit for the list of speicified queries:
+    question = st.selectbox("Select your Question", ("1. List of all the videos and the Channel name",  ## shortening the questions for the select tab
+                                                    "2. Channels with the most number of videos",
+                                                    "3. top 10 most viewed videos and their respective channels",
+                                                    "4. No. of comments in each video and corresponding video name",
+                                                    "5. Videos with highest no. of likes and corresponding video name",
+                                                    "6. Likes of all videos and the video names",
+                                                    "7. Total  views of each channel and channel name",
+                                                    "8. Videos published in the year of 2022 and channel name",
+                                                    "9. average duration of videos in each channel and channel name",
+                                                    "10. videos with the highest number of comments and channel name"))
 
-## sql connection
-my_data_base = psycopg2.connect(host = "localhost",
-                                user = "postgres",
-                                password = "phoenix275",
-                                database = "youtube_data",
-                                port = "5432")
-row_pointer_cursor = my_data_base.cursor()
+    ## query one - retrieving the ans from sql and displaying in streamlit
 
-question = st.selectbox("Select your Question",("1. List of all the videos and the Channel name",  ## shortening the questions for the select tab
-                                                "2. Channels with the most number of videos",
-                                                "3. top 10 most viewed videos and their respective channels",
-                                                "4. No. of comments in each video and corresponding video name",
-                                                "5. Videos with highest no. of likes and corresponding video name",
-                                                "6. Likes of all videos and the video names",
-                                                "7. Total  views of each channel and channel name",
-                                                "8. Videos published in the year of 2022 and channel name",
-                                                "9. average duration of videos in each channel and channel name",
-                                                "10. videos with the highest number of comments and channel name"))
+    if question == "1. List of all the videos and the Channel name":
+        cursor_query = my_data_base.cursor()
 
-## query one - retrieving the ans from sql and displaying in streamlit
-
-if question == "1. List of all the videos and the Channel name":
-    cursor_query = my_data_base.cursor()
-
-    query_one = '''select video_title as video_name, channel_name as name_of_channel from video_details'''
-    cursor_query.execute(query_one) # query is run
-    my_data_base.commit() # it is committed in sql
-    t1_q1 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q1 = pd.DataFrame(t1_q1, columns = ["video title", "channel name"])
-    st.write(dataframe_ans_q1) # for display in streamlit
-
-
-elif question == "2. Channels with the most number of videos":
-    cursor_query = my_data_base.cursor()
-
-    query_two = '''select channel_name as name_of_channel, total_videos as video_count from channels
-                order by total_videos desc'''
-    cursor_query.execute(query_two) # query is run
-    my_data_base.commit() # it is committed in sql
-    t2_q2 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q2 = pd.DataFrame(t2_q2, columns = ["channel name", "number of videos"])
-    st.write(dataframe_ans_q2) # for display in streamlit
+        query_one = '''select video_title as video_name, channel_name as name_of_channel from video_details'''
+        cursor_query.execute(query_one)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t1_q1 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q1 = pd.DataFrame(t1_q1, columns=["video title", "channel name"])
+        st.write(dataframe_ans_q1)  # for display in streamlit
 
 
-elif question == "3. top 10 most viewed videos and their respective channels":
-    cursor_query = my_data_base.cursor()
+    elif question == "2. Channels with the most number of videos":
+        cursor_query = my_data_base.cursor()
 
-    query_three = '''select number_views as number_of_views, channel_name as name_of_channel,
-                    video_title as title_of_video from video_details 
-                    where number_views is not null order by number_views desc limit 10'''
-    cursor_query.execute(query_three) # query is run
-    my_data_base.commit() # it is committed in sql
-    t3_q3 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q3 = pd.DataFrame(t3_q3, columns = ["no. views", "channel name", "video title"])
-    st.write(dataframe_ans_q3) # for display in streamlit
-
-elif question == "4. No. of comments in each video and corresponding video name":
-    cursor_query = my_data_base.cursor()
-
-    query_four = '''select number_comments as number_of_comments, video_title as title_of_video from video_details 
-                    where number_comments is not null'''
-    cursor_query.execute(query_four) # query is run
-    my_data_base.commit() # it is committed in sql
-    t4_q4 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q4 = pd.DataFrame(t4_q4, columns = ["no. comments", "video title"])
-    st.write(dataframe_ans_q4) # for display in streamlit
+        query_two = '''select channel_name as name_of_channel, total_videos as video_count from channels
+                    order by total_videos desc'''
+        cursor_query.execute(query_two)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t2_q2 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q2 = pd.DataFrame(t2_q2, columns=["channel name", "number of videos"])
+        st.write(dataframe_ans_q2)  # for display in streamlit
 
 
-elif question == "5. Videos with highest no. of likes and corresponding video name":
-    cursor_query = my_data_base.cursor()
+    elif question == "3. top 10 most viewed videos and their respective channels":
+        cursor_query = my_data_base.cursor()
 
-    query_five = '''select channel_name as name_of_channel, number_likes as number_of_likes, 
-                    video_title as title_of_video from video_details where number_likes is not null
-                    order by number_likes desc'''
-    cursor_query.execute(query_five) # query is run
-    my_data_base.commit() # it is committed in sql
-    t5_q5 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q5 = pd.DataFrame(t5_q5, columns = ["channel name", "no. likes", "video title"])
-    st.write(dataframe_ans_q5) # for display in streamlit
+        query_three = '''select number_views as number_of_views, channel_name as name_of_channel,
+                        video_title as title_of_video from video_details 
+                        where number_views is not null order by number_views desc limit 10'''
+        cursor_query.execute(query_three)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t3_q3 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q3 = pd.DataFrame(t3_q3, columns=["no. views", "channel name", "video title"])
+        st.write(dataframe_ans_q3)  # for display in streamlit
 
+    elif question == "4. No. of comments in each video and corresponding video name":
+        cursor_query = my_data_base.cursor()
 
-elif question == "6. Likes of all videos and the video names":
-    cursor_query = my_data_base.cursor()
-
-    query_six = '''select number_likes as number_of_likes, 
-                    video_title as title_of_video from video_details where number_likes is not null'''
-    cursor_query.execute(query_six) # query is run
-    my_data_base.commit() # it is committed in sql
-    t6_q6 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q6 = pd.DataFrame(t6_q6, columns = ["no. likes", "video title"])
-    st.write(dataframe_ans_q6) # for display in streamlit
-
-
-elif question == "7. Total  views of each channel and channel name":
-    cursor_query = my_data_base.cursor()
-
-    query_seven = '''select channel_name as name_of_channel, 
-                    views_channel as total_views_channel from channels'''
-    cursor_query.execute(query_seven) # query is run
-    my_data_base.commit() # it is committed in sql
-    t7_q7 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q7 = pd.DataFrame(t7_q7, columns = ["channel name", "total views"])
-    st.write(dataframe_ans_q7) # for display in streamlit
+        query_four = '''select number_comments as number_of_comments, video_title as title_of_video from video_details 
+                        where number_comments is not null'''
+        cursor_query.execute(query_four)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t4_q4 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q4 = pd.DataFrame(t4_q4, columns=["no. comments", "video title"])
+        st.write(dataframe_ans_q4)  # for display in streamlit
 
 
-elif question == "8. Videos published in the year of 2022 and channel name":
-    cursor_query = my_data_base.cursor()
+    elif question == "5. Videos with highest no. of likes and corresponding video name":
+        cursor_query = my_data_base.cursor()
 
-    query_eight = '''select video_title as title_of_video, published_date as vd_published_on, 
-                    channel_name as name_of_channel from video_details
-                    where extract(year from published_date) = 2022'''
-    cursor_query.execute(query_eight) # query is run
-    my_data_base.commit() # it is committed in sql
-    t8_q8 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q8 = pd.DataFrame(t8_q8, columns = ["video title", "published date", "channel name"])
-    st.write(dataframe_ans_q8) # for display in streamlit
-
-
-elif question == "9. average duration of videos in each channel and channel name":
-    cursor_query = my_data_base.cursor()
-
-    query_nine = '''select channel_name as name_of_channel, AVG(duration_video) as average_duration
-                    from video_details group by channel_name'''
-    cursor_query.execute(query_nine) # query is run
-    my_data_base.commit() # it is committed in sql
-    t9_q9 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q9 = pd.DataFrame(t9_q9, columns = ["channel name", "average duration"])
-
-    t9_strmlt = []
-    for jindex, row in dataframe_ans_q9.iterrows():
-        channel_tite = row["channel name"]
-        average_duration = row["average duration"]
-        average_duration_str = str(row["average duration"])
-        t9_strmlt.append(dict(channeltitle =  channel_tite, avgduration = average_duration_str))
-    df_t9_strmlt = pd.DataFrame(t9_strmlt)
-
-    st.write(df_t9_strmlt) # for display in streamlit
+        query_five = '''select channel_name as name_of_channel, number_likes as number_of_likes, 
+                        video_title as title_of_video from video_details where number_likes is not null
+                        order by number_likes desc'''
+        cursor_query.execute(query_five)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t5_q5 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q5 = pd.DataFrame(t5_q5, columns=["channel name", "no. likes", "video title"])
+        st.write(dataframe_ans_q5)  # for display in streamlit
 
 
-elif question == "10. videos with the highest number of comments and channel name":
-    cursor_query = my_data_base.cursor()
+    elif question == "6. Likes of all videos and the video names":
+        cursor_query = my_data_base.cursor()
 
-    query_ten = '''select video_title as title_of_video, number_comments as numb_of_comments, 
-                    channel_name as name_of_channel from video_details
-                    where number_comments is not null order by number_comments desc'''
-    cursor_query.execute(query_ten) # query is run
-    my_data_base.commit() # it is committed in sql
-    t10_q10 = cursor_query.fetchall() #getting the details from sql and storing in "t1_q1"
-    dataframe_ans_q10 = pd.DataFrame(t10_q10, columns = ["video title", "number of comments", "channel name"])
-    st.write(dataframe_ans_q10) # for display in streamlit
+        query_six = '''select number_likes as number_of_likes, 
+                        video_title as title_of_video from video_details where number_likes is not null'''
+        cursor_query.execute(query_six)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t6_q6 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q6 = pd.DataFrame(t6_q6, columns=["no. likes", "video title"])
+        st.write(dataframe_ans_q6)  # for display in streamlit
+
+
+    elif question == "7. Total  views of each channel and channel name":
+        cursor_query = my_data_base.cursor()
+
+        query_seven = '''select channel_name as name_of_channel, 
+                        views_channel as total_views_channel from channels'''
+        cursor_query.execute(query_seven)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t7_q7 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q7 = pd.DataFrame(t7_q7, columns=["channel name", "total views"])
+        st.write(dataframe_ans_q7)  # for display in streamlit
+
+
+    elif question == "8. Videos published in the year of 2022 and channel name":
+        cursor_query = my_data_base.cursor()
+
+        query_eight = '''select video_title as title_of_video, published_date as vd_published_on, 
+                        channel_name as name_of_channel from video_details
+                        where extract(year from published_date) = 2022'''
+        cursor_query.execute(query_eight)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t8_q8 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q8 = pd.DataFrame(t8_q8, columns=["video title", "published date", "channel name"])
+        st.write(dataframe_ans_q8)  # for display in streamlit
+
+
+    elif question == "9. average duration of videos in each channel and channel name":
+        cursor_query = my_data_base.cursor()
+
+        query_nine = '''select channel_name as name_of_channel, AVG(duration_video) as average_duration
+                        from video_details group by channel_name'''
+        cursor_query.execute(query_nine)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t9_q9 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q9 = pd.DataFrame(t9_q9, columns=["channel name", "average duration"])
+
+        t9_strmlt = []
+        for jindex, row in dataframe_ans_q9.iterrows():
+            channel_tite = row["channel name"]
+            average_duration = row["average duration"]
+            average_duration_str = str(row["average duration"])
+            t9_strmlt.append(dict(channeltitle=channel_tite, avgduration=average_duration_str))
+        df_t9_strmlt = pd.DataFrame(t9_strmlt)
+
+        st.write(df_t9_strmlt)  # for display in streamlit
+
+
+    elif question == "10. videos with the highest number of comments and channel name":
+        cursor_query = my_data_base.cursor()
+
+        query_ten = '''select video_title as title_of_video, number_comments as numb_of_comments, 
+                        channel_name as name_of_channel from video_details
+                        where number_comments is not null order by number_comments desc'''
+        cursor_query.execute(query_ten)  # query is run
+        my_data_base.commit()  # it is committed in sql
+        t10_q10 = cursor_query.fetchall()  # getting the details from sql and storing in "t1_q1"
+        dataframe_ans_q10 = pd.DataFrame(t10_q10, columns=["video title", "number of comments", "channel name"])
+        st.write(dataframe_ans_q10)  # for display in streamlit
+        st.write(dataframe_ans_q10)  # for display in streamlit
+
+elif page == "My outcomes":
+    st.write("On completion of this capstone project, the following are my takeaways:")
+    st.write("1. More confident about debugging")
+    st.write("2. More confident about python coding")
+    st.write("3. have been able to input a YouTube channel ID and retrieve all the relevant data using Google API")
+    st.write("4. have been able to collect data for up to 10 different YouTube channels")
+    st.write("5. have been able to collect data for up to 10 different YouTube channels")
+    st.write("6. have been exposed to trying to work in sql and others (libraries) such as pandas")
+
+
+
+

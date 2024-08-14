@@ -524,7 +524,7 @@ for each_channel_id in channel_ids_list:
 
 with st.sidebar:
     st.title(":blue[YOUTUBE DATA HARVESTING AND WAREHOUSING]")
-    st.header("Skill Take Away")
+    st.header("Skill Cup")
     st.caption("Python Scripting")
     st.caption("Data Collection")
     st.caption("MongoDB")
