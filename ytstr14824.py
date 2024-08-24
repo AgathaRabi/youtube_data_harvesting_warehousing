@@ -3,7 +3,7 @@
 # print("Hello World")  # test
 
 #  API KEY CREATED - IS BELOW
-# "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
+# "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # next step is accessing data from you-tube
     # for that we need to write a function
@@ -20,7 +20,7 @@ import pandas as pd
 import streamlit as st
 
 def Api_connect(): # in this, API id, API service name, API version # helps you to access yt details
-    Api_Id = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU" # API key
+    Api_Id = "xxxxxxxxxxxxxxxxxxxxxxx" # API key
     Api_Service_Name = "youtube"  # service name
     Api_Version = "v3"
 
