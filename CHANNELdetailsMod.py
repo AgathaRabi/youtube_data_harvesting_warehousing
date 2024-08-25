@@ -11,7 +11,48 @@ import pandas as pd
 import streamlit as st
 import APIconnectMod
 
+
 ## get channel's information through function 'get_channel_info'
+
+        ###  10 channel ids
+
+def get_channel_info(channel_ids_list):
+    channel_meta_data_all_channels = []
+    for each_channel_id in channel_ids_list:
+
+        channel_info_request = youtube_access.channels().list(
+                    part = "snippet, ContentDetails, statistics",
+                    id = each_channel_id  # here we can call how many ever channels we need
+        )
+        channel_info_response = channel_info_request.execute()
+
+        for information in channel_info_response['items']:  ### here you are getting only the details you need of the channel.
+            data_channel = dict(Channel_Name = information['snippet']['title'],
+                                Channel_Id = information['id'],
+                                Subscribers_Count = information['statistics']['subscriberCount'],
+                                Views_Channel = information['statistics']['viewCount'],
+                                Total_Videos = information['statistics']['videoCount'],
+                                Channel_Description = information['snippet']['description'],
+                                Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
+            channel_meta_data_all_channels.append(data_channel)
+        #data_frame_zero = pd.DataFrame(channel_meta_data_all_channels)
+    return channel_meta_data_all_channels
+
+
+
+youtube_access = APIconnectMod.Api_connect()
+all_channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
+                    "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
+                    "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
+                    "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
+                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]
+
+call_test = get_channel_info(all_channel_ids_list)
+#print(call_test)
+
+#############  for single channel id   #############
+
+"""## get channel's information through function 'get_channel_info'
 
 def get_channel_info(channel_id):
     channel_info_request = youtube_access.channels().list(
@@ -32,7 +73,7 @@ def get_channel_info(channel_id):
 
     #df_chdts = pd.DataFrame(data_channel)
     return data_channel
-
+"""
 
 """## channel details table:
 def channels_details_table():
@@ -89,8 +130,8 @@ def channels_details_table():
 
 
 youtube_access = APIconnectMod.Api_connect()
-channel_id = "UCKmE9i2iW0KaqgSxVFYmZUw" #"UC5HdAapbvqWN65GIqpWWL3Q"
-call_test = get_channel_info("UCKmE9i2iW0KaqgSxVFYmZUw")
+#channel_id = "UCKmE9i2iW0KaqgSxVFYmZUw" #"UC5HdAapbvqWN65GIqpWWL3Q"
+#call_test = get_channel_info("UCKmE9i2iW0KaqgSxVFYmZUw")
 #print(call_test)
 #ch_data_table = channels_details_table()
 

@@ -68,7 +68,7 @@ def get_channel_video_id(current_channel_id):
 
 
 
-channel_id = "UCKmE9i2iW0KaqgSxVFYmZUw"   ## "UC5HdAapbvqWN65GIqpWWL3Q"
+#channel_id = "UCKmE9i2iW0KaqgSxVFYmZUw"   ## "UC5HdAapbvqWN65GIqpWWL3Q"
 youtube_access = APIconnectMod.Api_connect()
 
 all_video_ids = get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')

@@ -7,7 +7,6 @@ import pymongo
 import psycopg2
 import pandas as pd
 import streamlit as st
-#import channeldetails
 import VIDEOidMod
 
 def video_details_in_channel(obt_video_ids):
@@ -38,7 +37,7 @@ def video_details_in_channel(obt_video_ids):
 
     return video_meta_data_for_allVs
 
-derived_video_ids = VIDEOidMod.get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
+#derived_video_ids = VIDEOidMod.get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
 
 #call = video_details_in_channel(derived_video_ids) ## test
 #print(call)   ##   test

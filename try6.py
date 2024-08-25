@@ -3,7 +3,7 @@
 # print("Hello World")  # test
 
 #  API KEY CREATED - IS BELOW
-# "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
+# "xxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # next step is accessing data from you-tube
     # for that we need to write a function
@@ -16,7 +16,6 @@
 from googleapiclient.discovery import build
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
 from sqlalchemy import event
 import sqlalchemy
 import pymongo
@@ -25,7 +24,7 @@ import pandas as pd
 import streamlit as st
 
 def Api_connect(): # in this, API id, API service name, API version # helps you to access yt details
-    Api_Id = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU" # API key
+    Api_Id = "xxxxxxxxxxxxxxxxxxxxxxxxxxx" # API key
     Api_Service_Name = "youtube"  # service name
     Api_Version = "v3"
 
@@ -52,80 +51,93 @@ def get_channel_info(channel_id):
                             Channel_Description = information['snippet']['description'],
                             Playlist_Id = information['contentDetails']['relatedPlaylists']['uploads'])
 
-    df_chdts = pd.DataFrame(data_channel)
+    #df_chdts = pd.DataFrame(data_channel)
     return data_channel
 
+def channels_details_table():
+    my_data_base = psycopg2.connect(host="localhost",
+                                    user="postgres",
+                                    password="phoenix275",
+                                    database="youtube_data",
+                                    port="5432")
+    row_pointer_cursor = my_data_base.cursor() ## creating a cusor object
 
+    ## for dropping tables in case of us needing to add or overwrite data
 
-"""####  trying to get only 10 or 5 videos to use the api efficiently
-def get_channel_video_id(current_channel_id):
+    drop_query = '''drop table if exists channels'''
+    row_pointer_cursor.execute(drop_query)
+    my_data_base.commit()
 
-    ## create a list to upload the videos ids
-    videos_ids_list = []
-
-    ## now to get the upload id
-    Call_Api_vd_id = youtube_access.channels().list(id = current_channel_id,
-                                                    part ='contentDetails').execute()
-    upload_id_vd_id = Call_Api_vd_id['items'][0]['contentDetails']['relatedPlaylists']['uploads']## got the upload id
-    get_video_ids = youtube_access.playlistItems().list(part = 'snippet', playlistId = upload_id_vd_id).execute() #, maxResults = 5)
-
-    for index in range(len(get_video_ids['items'])):
-        videos_ids_list.append(get_video_ids['items'][index]['snippet']['resourceId']['videoId'])
-
-    return videos_ids_list
-
-### get that particular channel's videos' information, using the respective video ids
-
-def video_details_in_channel(obt_video_ids):
-    video_meta_data_for_allVs = []
-    for each_video_id in obt_video_ids:
-        request_video_information_api = youtube_access.videos().list(part = 'snippet, contentDetails, statistics',
-                                                                     id = each_video_id)
-        get_video_details = request_video_information_api.execute()
-
-        for item in get_video_details["items"]:
-            video_meta_data = dict(Channel_Name = item['snippet']['channelTitle'],
-                                    Channel_Id = item['snippet']['channelId'],
-                                    Video_Id = item['id'], Video_Title = item['snippet']['title'],
-                                    Tags_Video=item['snippet']['tags'] if 'tags' in item['snippet'] else None,
-                                    Number_Likes=item['statistics'].get('likeCount'),
-                                    Thumbnails = item['snippet']['thumbnails']['default']['url'], # if 'thumbnails' in item['snippet'] else None,
-                                    Description = item['snippet']['description'] if 'description' in item['snippet'] else None,
-                                    Published_Date = item['snippet']['publishedAt'],
-                                    Duration_Video = item['contentDetails'].get('duration'),
-                                   Number_Views = item['statistics'].get('viewCount'),
-                                   Number_Comments = item['statistics'].get('commentCount'),
-                                   Favourite_Count = item['statistics'].get('favouriteCount'),
-                                   Definition = item['contentDetails']['definition'],
-                                   Caption_Status = item['contentDetails']['caption'])
-                                    ## above --- :  getting the specific details using slicing
-            # number_likes=item['snippet']['statistics']['viewCount']
-            video_meta_data_for_allVs.append(video_meta_data)
-
-    return video_meta_data_for_allVs
-
-###  to get the comment details
-
-def comment_details_videos(total_video_ids):
-    comment_meta_data_list =[]
     try:
-        for every_video_id in total_video_ids:
-            request_video_comment_api =youtube_access.commentThreads().list(part = 'snippet',
-                                                                         videoId = every_video_id, maxResults = 50)
-            to_get_comment_details = request_video_comment_api.execute()
-            for comment_detail in to_get_comment_details['items']:
-                ## getting specific details using slicing
-                comment_meta_data = dict(Comment_Gvn_Id = comment_detail['snippet']['topLevelComment']['id'],
-                                         Video_Id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
-                                         Comment_Text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
-                                         Comment_Author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
-                                         Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
-                comment_meta_data_list.append(comment_meta_data)
-
-
+        create_query = '''create table if not exists channels(Channel_Name varchar(100),
+                                                               Channel_Id varchar(80) primary key,
+                                                                Subscribers_Count bigint,
+                                                                Views_Channel bigint,
+                                                                Total_Videos int,
+                                                                Channel_Description text,
+                                                                Playlist_Id varchar(80))'''
+        row_pointer_cursor.execute(create_query)
+        my_data_base.commit()
     except:
-        pass
+        print("channels tables are created")
 
-    return comment_meta_data_list"""
+    #cursor connect
 
+
+
+    ## getting data
+
+    aa = get_channel_info("UC5HdAapbvqWN65GIqpWWL3Q")
+    data_tobe_inserted = []
+
+    """### getting channel table - data from mongodb
+
+    ch_data_list_from_mngdb = []
+    data_base = client["youtube_data"]
+    collection1 = data_base['youtube_channel_details']"""
+
+    for ch_data in check.find({}, {"_id": 0, "Channel_Information": 1}):
+        data_tobe_inserted.append(ch_data["Channel_Information"])
+    data_frame_zero = pd.DataFrame(data_tobe_inserted)
+    print(data_frame_zero)
+    print(aa)
+
+    ### inserting channel data into postgresql channel table
+
+    for index, row in data_frame_zero.iterrows():
+        insert_query = '''insert into channels (Channel_Name,
+                                                Channel_Id,
+                                                Subscribers_Count,
+                                                Views_Channel,
+                                                Total_Videos,
+                                                Channel_Description,
+                                                Playlist_Id)
+
+                                                values(%s, %s, %s, %s, %s, %s, %s)'''
+
+        value_ch = (row['Channel_Name'],
+                    row['Channel_Id'],
+                    row['Subscribers_Count'],
+                    row['Views_Channel'],
+                    row['Total_Videos'],
+                    row['Channel_Description'],
+                    row['Playlist_Id'])
+        print(value_ch)
+        try:
+            row_pointer_cursor.execute(insert_query, value_ch)
+            my_data_base.commit()
+
+        except:
+            print("channel values are already inserted")
+
+
+    return
+
+
+channel_id = "UC5HdAapbvqWN65GIqpWWL3Q"
 youtube_access = Api_connect()
+
+check = get_channel_info("UC5HdAapbvqWN65GIqpWWL3Q")
+print(check)
+
+

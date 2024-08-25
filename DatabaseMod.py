@@ -22,6 +22,7 @@ import COMMENTdetailsMod
 
 
 
+
 ## channel details table:
 def channels_details_table():
     ##connect to sql
@@ -55,26 +56,37 @@ def channels_details_table():
     except:
         print("channels tables are created")
 
-    channel_details_obtained = CHANNELdetailsMod.get_channel_info(channel_id)  #("UC5HdAapbvqWN65GIqpWWL3Q")
+    channel_details_obtained = CHANNELdetailsMod.get_channel_info(all_channel_ids_list)
+    data_frame_zero = pd.DataFrame(channel_details_obtained)
+    print(data_frame_zero)
+    #channel_details_obtained = CHANNELdetailsMod.get_channel_info(channel_id)  #("UC5HdAapbvqWN65GIqpWWL3Q")
     #print(channel_details_obtained)
     #columns = channel_details_obtained.keys()
-    calling_values = tuple(channel_details_obtained.values())
+    #calling_values = tuple(channel_details_obtained.values())
     #print(calling_values)
     #print("hello")
 
-    #for i in channel_details_obtained.values():
-    insert_into_sql = '''insert into channels (Channel_Name,
-                                                Channel_Id,
-                                                Subscribers_Count,
-                                                Views_Channel,
-                                                Total_Videos,
-                                                Channel_Description,
-                                                Playlist_Id) VALUES(%s, %s, %s, %s, %s, %s, %s);'''
-    row_pointer_cursor.execute(insert_into_sql, calling_values)
+    for index, row in data_frame_zero.iterrows():
+        insert_into_sql = '''insert into channels (Channel_Name,
+                                                    Channel_Id,
+                                                    Subscribers_Count,
+                                                    Views_Channel,
+                                                    Total_Videos,
+                                                    Channel_Description,
+                                                    Playlist_Id) VALUES(%s, %s, %s, %s, %s, %s, %s);'''
+        value_ch = (row['Channel_Name'],
+                    row['Channel_Id'],
+                    row['Subscribers_Count'],
+                    row['Views_Channel'],
+                    row['Total_Videos'],
+                    row['Channel_Description'],
+                    row['Playlist_Id'])
 
-    my_data_base_conn.commit()
+        row_pointer_cursor.execute(insert_into_sql, value_ch)
+        #row_pointer_cursor.execute(insert_into_sql) #, calling_values)
+
+        my_data_base_conn.commit()
     #my_data_base_conn.close()
-
 
 
 
@@ -216,20 +228,25 @@ def comments_details_table():
         row_pointer_cursor.execute(insert_query_commentdts, value_commentdts)
         my_data_base_conn.commit()
 
-comments_table_call = comments_details_table()
 
 
 
 
 
-channel_id = "UCKmE9i2iW0KaqgSxVFYmZUw"
+all_channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
+                    "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
+                    "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
+                    "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
+                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]
+
+
+#channel_id_given = "UCKmE9i2iW0KaqgSxVFYmZUw"
 
 ch_data_table = channels_details_table()  ###  calling the channel details table function
 
-
 vid_dets = videos_details_table()        ###  calling the video details table function
 
-comments_table_call = comments_details_table()
+comments_table_call = comments_details_table()   #### calling the comments details
 
 
 
@@ -239,3 +256,58 @@ comments_table_call = comments_details_table()
 #data_frame_two = pd.DataFrame(video_details_call)
 #print(video_details_call)
 #print(data_frame_two)
+
+
+##########   single channel details table    #######
+"""## channel details table:
+def channels_details_table():
+    ##connect to sql
+    my_data_base_conn = psycopg2.connect(host="localhost",
+                                        user="postgres",
+                                        password="phoenix275",
+                                        database="youtube_data",
+                                        port="5432")
+    my_data_base_conn.autocommit = True
+    row_pointer_cursor = my_data_base_conn.cursor() ## creating a cusor object
+
+    ###  create table
+
+       # b4 that drop pre- existing tables
+                ## for dropping tables in case of us needing to add or overwrite data
+    drop_query = '''drop table if exists channels'''
+    row_pointer_cursor.execute(drop_query)
+
+         # now create the new table:
+
+    try:
+        create_query = '''create table if not exists channels(Channel_Name varchar(100),
+                                                               Channel_Id varchar(80) primary key,
+                                                                Subscribers_Count bigint,
+                                                                Views_Channel bigint,
+                                                                Total_Videos int,
+                                                                Channel_Description text,
+                                                                Playlist_Id varchar(80))'''
+        row_pointer_cursor.execute(create_query)
+        #my_data_base_conn.commit()
+    except:
+        print("channels tables are created")
+
+    channel_details_obtained = CHANNELdetailsMod.get_channel_info(channel_id_given)  #("UC5HdAapbvqWN65GIqpWWL3Q")
+    #print(channel_details_obtained)
+    #columns = channel_details_obtained.keys()
+    calling_values = tuple(channel_details_obtained.values())
+    #print(calling_values)
+    #print("hello")
+
+    #for i in channel_details_obtained.values():
+    insert_into_sql = '''insert into channels (Channel_Name,
+                                                Channel_Id,
+                                                Subscribers_Count,
+                                                Views_Channel,
+                                                Total_Videos,
+                                                Channel_Description,
+                                                Playlist_Id) VALUES(%s, %s, %s, %s, %s, %s, %s);'''
+    row_pointer_cursor.execute(insert_into_sql, calling_values)
+
+    my_data_base_conn.commit()
+    #my_data_base_conn.close()"""
