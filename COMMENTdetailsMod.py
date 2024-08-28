@@ -57,8 +57,11 @@ def comment_details_videos(total_video_ids): ## all comments
     return comment_meta_data_list
 
 
-#obt_video_ids = VIDEOidMod.get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
 youtube_access = APIconnectMod.Api_connect()
+
+
+#obt_video_ids = VIDEOidMod.get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
+
 #comment_details_call = comment_details_videos(obt_video_ids)
 ### converting to data frame
 #data_frame_three = pd.DataFrame(comment_details_call)

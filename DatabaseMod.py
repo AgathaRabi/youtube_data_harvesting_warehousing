@@ -19,7 +19,7 @@ import CHANNELdetailsMod
 import VIDEOidMod
 import VIDEOdetailsMod
 import COMMENTdetailsMod
-
+from CHANNELidsLIST import channel_ids_list
 
 
 
@@ -56,9 +56,9 @@ def channels_details_table():
     except:
         print("channels tables are created")
 
-    channel_details_obtained = CHANNELdetailsMod.get_channel_info(all_channel_ids_list)
-    data_frame_zero = pd.DataFrame(channel_details_obtained)
-    print(data_frame_zero)
+    channel_details_obtained = CHANNELdetailsMod.get_channel_info(channel_ids_list)
+    data_frame_one = pd.DataFrame(channel_details_obtained)
+    print(data_frame_one)
     #channel_details_obtained = CHANNELdetailsMod.get_channel_info(channel_id)  #("UC5HdAapbvqWN65GIqpWWL3Q")
     #print(channel_details_obtained)
     #columns = channel_details_obtained.keys()
@@ -66,7 +66,7 @@ def channels_details_table():
     #print(calling_values)
     #print("hello")
 
-    for index, row in data_frame_zero.iterrows():
+    for index, row in data_frame_one.iterrows():
         insert_into_sql = '''insert into channels (Channel_Name,
                                                     Channel_Id,
                                                     Subscribers_Count,
@@ -96,7 +96,7 @@ def channels_details_table():
 
 ###  video details tables and inserting data:
 
-def videos_details_table():
+def videos_details_table(each_channel_id):
     ##connect to sql
     my_data_base_conn = psycopg2.connect(host="localhost",
                                         user="postgres",
@@ -131,7 +131,7 @@ def videos_details_table():
     my_data_base_conn.commit()
 
     ##  iserting data thus obtained into  postgresql tables
-    obt_video_ids = VIDEOidMod.get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
+    obt_video_ids = VIDEOidMod.get_channel_video_id(each_channel_id)
     video_details_call = VIDEOdetailsMod.video_details_in_channel(obt_video_ids)
     data_frame_two = pd.DataFrame(video_details_call)
     #calling_videoData_values = video_details_call
@@ -181,7 +181,7 @@ def videos_details_table():
 ####  comment details table
 
 
-def comments_details_table():
+def comments_details_table(each_video_id):
     # creating comment_details table in postgresql:
     # connecting
     my_data_base_conn = psycopg2.connect(host="localhost",
@@ -205,7 +205,7 @@ def comments_details_table():
     row_pointer_cursor.execute(create_query)
     my_data_base_conn.commit()
 
-    obt_video_ids = VIDEOidMod.get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
+    obt_video_ids = VIDEOidMod.get_channel_video_id(each_video_id)
     comment_details_call = COMMENTdetailsMod.comment_details_videos(obt_video_ids)
     ### converting to data frame
     data_frame_three = pd.DataFrame(comment_details_call)
@@ -233,7 +233,7 @@ def comments_details_table():
 
 
 
-all_channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
+"""all_channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
                     "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
                     "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
                     "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
@@ -244,9 +244,9 @@ all_channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
 
 ch_data_table = channels_details_table()  ###  calling the channel details table function
 
-vid_dets = videos_details_table()        ###  calling the video details table function
+vid_dets = videos_details_table()        ###  calling the video details table function"""
 
-comments_table_call = comments_details_table()   #### calling the comments details
+#comments_table_call = comments_details_table()   #### calling the comments details
 
 
 

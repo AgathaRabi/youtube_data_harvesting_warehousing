@@ -19,12 +19,27 @@ import CHANNELdetailsMod
 import VIDEOidMod
 import VIDEOdetailsMod
 import COMMENTdetailsMod
+import DatabaseMod
+from CHANNELidsLIST import channel_ids_list
 
 
 
 
-channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
-                    "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
-                    "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
-                    "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
-                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]
+"""channels_mdata_list = []
+channels_videoIDS_list = []
+for one_channel_id in channel_ids_list:
+    channel_details_call = CHANNELdetailsMod.get_channel_info(one_channel_id)
+    channels_mdata_list.append(channel_details_call)
+    channel_videoIDS_call = VIDEOidMod.get_channel_video_id(one_channel_id)
+    channels_videoIDS_list.append(channel_videoIDS_call)
+"""
+#print(channels_mdata_list)
+#print(channels_videoIDS_list)
+
+#video_details_call = VIDEOdetailsMod.video_details_in_channel(channels_videoIDS_list)
+
+channels_details_table_call = DatabaseMod.channels_details_table()
+
+
+
+

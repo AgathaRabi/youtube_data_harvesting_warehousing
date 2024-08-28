@@ -71,6 +71,13 @@ def get_channel_video_id(current_channel_id):
 #channel_id = "UCKmE9i2iW0KaqgSxVFYmZUw"   ## "UC5HdAapbvqWN65GIqpWWL3Q"
 youtube_access = APIconnectMod.Api_connect()
 
-all_video_ids = get_channel_video_id('UCKmE9i2iW0KaqgSxVFYmZUw')
+
 #print(all_video_ids)
+
+"""all_channel_ids_list = ["UC5HdAapbvqWN65GIqpWWL3Q", "UChGd9JY4yMegY6PxqpBjpRA",
+                    "UCrgLTEHTvedDsxdQzSAFyDA", "UC5B0fGVovcbBJXQBx5kmRhQ",
+                    "UCKmE9i2iW0KaqgSxVFYmZUw", "UC21vCCoVSqgB7NzZjxB9weg",
+                    "UC4c3Q2ym_hYei2cipr_KNaw", "UCy1lBBbXhtfzugF_LK2b6Yw",
+                    "UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]"""
+
 
