@@ -12,7 +12,7 @@ import streamlit as st
 
 
 def Api_connect(): # in this, API id, API service name, API version # helps you to access yt details
-    Api_Id = "xxxxxxxxxxxxxxxxxxxxxxxxxxx" # API key
+    Api_Id = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU" # API key
     Api_Service_Name = "youtube"  # service name
     Api_Version = "v3"
 
@@ -129,40 +129,40 @@ obt_video_ids = get_channel_video_id('UC7cgHgo42oYABKWabReHZyA')
 
 def comment_details_videos(total_video_ids): ## all comments
     comment_meta_data_list =[]
-#try:
-    get_next_page_token = None
-    ## to get all video ids a while loop is used
+    try:
+        get_next_page_token = None
+        ## to get all video ids a while loop is used
 
-    #now to get the video id, for each video at a time
-    #print(total_video_ids)
-    for every_video_id in total_video_ids:
-        all_comments_details = []
-        request_video_comment_api = youtube_access.commentThreads().list(part = 'snippet',
-                                                                    videoId = every_video_id, maxResults = 50,
-                                                                    pageToken = get_next_page_token)
-        print('Type of response: ', type(request_video_comment_api.execute()))
-        to_get_comment_details = request_video_comment_api.execute()
-        print(every_video_id)
-        while True:
-            if 'nextPageToken' in to_get_comment_details:
-                get_next_page_token = to_get_comment_details['nextPageToken']
-                if get_next_page_token is None:
-                    break
-            else: break
-        all_comments_details.append(to_get_comment_details)
-        #print(to_get_comment_details)
-        for comment_detail in to_get_comment_details['items']:
-            ## getting specific details using slicing
-            comment_meta_data = dict(Comment_Gvn_Id = comment_detail['snippet']['topLevelComment']['id'],
-                                     Video_Id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
-                                     Comment_Text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
-                                     Comment_Author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
-                                     Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
-            comment_meta_data_list.append(comment_meta_data)
+        #now to get the video id, for each video at a time
+        #print(total_video_ids)
+        for every_video_id in total_video_ids:
+            all_comments_details = []
+            request_video_comment_api = youtube_access.commentThreads().list(part = 'snippet',
+                                                                        videoId = every_video_id, maxResults = 50,
+                                                                        pageToken = get_next_page_token)
+            print('Type of response: ', type(request_video_comment_api.execute()))
+            to_get_comment_details = request_video_comment_api.execute()
+            print(every_video_id)
+            while True:
+                if 'nextPageToken' in to_get_comment_details:
+                    get_next_page_token = to_get_comment_details['nextPageToken']
+                    if get_next_page_token is None:
+                        break
+                else: break
+            all_comments_details.append(to_get_comment_details)
+            #print(to_get_comment_details)
+            for comment_detail in to_get_comment_details['items']:
+                ## getting specific details using slicing
+                comment_meta_data = dict(Comment_Gvn_Id = comment_detail['snippet']['topLevelComment']['id'],
+                                         Video_Id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
+                                         Comment_Text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
+                                         Comment_Author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
+                                         Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
+                comment_meta_data_list.append(comment_meta_data)
 
 
-#except:
-    #pass
+    except:
+        pass
 
     return comment_meta_data_list
 

@@ -86,5 +86,7 @@ all_channels_all_video_data_list = []
 for video_ids in channels_video_ids_list:
     video_meta_data_list = ModVIDEOmetaDATA.get_videos_meta_data_for_channels(video_ids, api_connection)
     all_channels_all_video_data_list.append(video_meta_data_list)
-all_channels_all_video_data_list_dataFrame = pd.DataFrame(all_channels_all_video_data_list)
-print(all_channels_all_video_data_list_dataFrame)
+all_channels_all_video_data_list_dataFrame = pd.DataFrame(tuple(all_channels_all_video_data_list))
+#print(all_channels_all_video_data_list)
+
+db_int.add_data_to_video_dets_table(all_channels_all_video_data_list, db_conn)
