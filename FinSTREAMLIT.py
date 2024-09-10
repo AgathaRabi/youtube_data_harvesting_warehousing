@@ -11,7 +11,7 @@ import FinChannelDETAILS
 
 # Get the local DB connection
 db_conn = db_int.get_local_db_conn()
-api_key = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
+api_key = "xxxxxx"
 API_conn = FinMAIN.get_youtube_api_conn(api_key)
 
 # The streamlit program lines

@@ -69,7 +69,7 @@ def run(api_key, pre_def_channel_ids):
 
 if __name__ == '__main__':
 
-    api_key = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
+    api_key = "xxxxxx"
 
     pre_def_channel_ids = ["UChGd9JY4yMegY6PxqpBjpRA", "UCrgLTEHTvedDsxdQzSAFyDA",
                            "UC5B0fGVovcbBJXQBx5kmRhQ", "UCKmE9i2iW0KaqgSxVFYmZUw",
