@@ -4,7 +4,6 @@ Module with functions to perform Create, Read, Update, Delete operations on the 
 
 import psycopg2
 
-
 def get_local_db_conn():
     """
     Function to connect to the local database and return
@@ -49,7 +48,6 @@ def drop_and_create_channel_dets_table(db_conn):
                                                                 Playlist_Id varchar(80))'''
         cursor.execute(create_query)
 
-        # If auto-commit is true, is the below line needed? Can you check?
         db_conn.commit()
 
     except:
@@ -258,7 +256,6 @@ def fetch_channel_detail(channel_id, db_conn):
 
     cursor = db_conn.cursor()
 
-    # Not sure whether this is the correct syntax. have to check
     fetch_query = '''SELECT * FROM channels where channel_id=%s'''
 
     cursor.execute(fetch_query, (channel_id, ))
@@ -279,17 +276,12 @@ def fetch_all_channel_details(db_conn):
 
     cursor = db_conn.cursor()
 
-    # Not sure wether this is the correct syntax. have to check
     fetch_query = '''SELECT * FROM channels'''
 
     cursor.execute(fetch_query)
     result = cursor.fetchall()
 
-    #print(result)
-    #print(type(result[0]))
-
     return result
-
 
     # Return list of objects or None if result is empty.
 

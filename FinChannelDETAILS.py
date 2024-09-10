@@ -94,7 +94,7 @@ def get_channel_playlist_video_ids(channel_id, api_connection):
                                                    part='contentDetails').execute()
     upload_id = playlist_info['items'][0]['contentDetails']['relatedPlaylists']['uploads']  ## got the upload id
     upload_info = api_connection.playlistItems().list(part='snippet',
-                                                      playlistId=upload_id, maxResults = 50).execute()  # )
+                                                      playlistId=upload_id, maxResults = 50).execute()
 
     for index in range(len(upload_info['items'])):
         videos_ids_list.append(upload_info['items'][index]['snippet']['resourceId']['videoId'])
@@ -106,7 +106,7 @@ def get_channels_playlist_video_ids(channel_ids, api_connection):
     """
     Parameters:
     ----------
-    channel_ids: list
+    channel_ids: list.
         List with the ids of channels for which information needs to be fetched
     api_connection
         The API connection object
@@ -116,14 +116,6 @@ def get_channels_playlist_video_ids(channel_ids, api_connection):
     Dictionary where key is the channel id and value is the list of video ids for that channel
     """
 
-    """channels_video_ids_dict = {}
-
-    for channel_id in channel_ids:
-        video_ids = get_channel_playlist_video_ids(channel_id, api_connection)
-        channels_video_ids_dict[channel_id] = video_ids
-
-    return channels_video_ids_dict"""
-
     channels_video_ids_list = []
 
     for channel_id in channel_ids:
@@ -131,3 +123,60 @@ def get_channels_playlist_video_ids(channel_ids, api_connection):
         channels_video_ids_list.append(video_ids)
 
     return channels_video_ids_list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+# To get all page tokens:
+
+def get_channel_playlist_video_ids(channel_id, api_connection):
+    
+
+    # create a list to upload the videos ids
+    videos_ids_list = []
+
+    # Build the playlist info request
+    playlist_info = api_connection.channels().list(id=channel_id,
+                                                   part='contentDetails').execute()
+    upload_id = playlist_info['items'][0]['contentDetails']['relatedPlaylists']['uploads']  ## got the upload id
+    get_next_page_token = None
+    ## to get all video ids a while loop is used
+    while True:
+        upload_info = api_connection.playlistItems().list(part='snippet',
+                                                          playlistId=upload_id, maxResults = 50, pageToken = get_next_page_token).execute()
+
+        for index in range(len(upload_info['items'])):
+            videos_ids_list.append(upload_info['items'][index]['snippet']['resourceId']['videoId'])
+        get_next_page_token = upload_info.get('nextPageToken')
+        ## to break the while loop when you reach the end of pages
+        if get_next_page_token is None:
+            break
+    return videos_ids_list"""
+
+
+####------####
+"""channels_video_ids_dict = {}
+
+   for channel_id in channel_ids:
+       video_ids = get_channel_playlist_video_ids(channel_id, api_connection)
+       channels_video_ids_dict[channel_id] = video_ids
+
+   return channels_video_ids_dict"""

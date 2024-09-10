@@ -31,6 +31,45 @@ def get_videos_meta_data_for_videos(obt_video_ids, api_connection):
 
     return pd.DataFrame(video_meta_data_for_allVs)
 
+
+# following is the function to get the comment details:
+
+def get_comment_details_videos(total_video_ids, api_connection):
+    """
+
+    :param total_video_ids:
+    :param api_connection:
+    :return: comment details of the videos
+    """
+    comment_meta_data_list =[]
+    try:
+        for every_video_id in total_video_ids:
+            request_video_comment_api =api_connection.commentThreads().list(part = 'snippet',
+                                                                         videoId = every_video_id, maxResults = 50)
+            to_get_comment_details = request_video_comment_api.execute()
+            for comment_detail in to_get_comment_details['items']:
+                ## getting specific details using slicing
+                comment_meta_data = dict(Comment_Gvn_Id = comment_detail['snippet']['topLevelComment']['id'],
+                                         Video_Id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
+                                         Comment_Text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
+                                         Comment_Author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
+                                         Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
+                comment_meta_data_list.append(comment_meta_data)
+
+
+    except:
+        pass
+
+    return pd.DataFrame(comment_meta_data_list)
+
+
+
+
+
+
+
+
+
 #### all comments  :
 
 """
@@ -73,26 +112,5 @@ def get_comment_details_videos(total_video_ids, api_connection): ## all comments
 
     return pd.DataFrame(comment_meta_data_list)"""
 
-### only 50 comments
-
-def get_comment_details_videos(total_video_ids, api_connection):  ### only 50 comments
-    comment_meta_data_list =[]
-    try:
-        for every_video_id in total_video_ids:
-            request_video_comment_api =api_connection.commentThreads().list(part = 'snippet',
-                                                                         videoId = every_video_id, maxResults = 50)
-            to_get_comment_details = request_video_comment_api.execute()
-            for comment_detail in to_get_comment_details['items']:
-                ## getting specific details using slicing
-                comment_meta_data = dict(Comment_Gvn_Id = comment_detail['snippet']['topLevelComment']['id'],
-                                         Video_Id = comment_detail['snippet']['topLevelComment']['snippet']['videoId'],
-                                         Comment_Text = comment_detail['snippet']['topLevelComment']['snippet']['textDisplay'],
-                                         Comment_Author = comment_detail['snippet']['topLevelComment']['snippet']['authorDisplayName'],
-                                         Comment_Published_Date = comment_detail['snippet']['topLevelComment']['snippet']['publishedAt'])
-                comment_meta_data_list.append(comment_meta_data)
 
 
-    except:
-        pass
-
-    return pd.DataFrame(comment_meta_data_list)

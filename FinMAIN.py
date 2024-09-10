@@ -6,7 +6,6 @@ from googleapiclient.discovery import build
 import FinVIDEOmetaDATA
 import FinDATABASEinterface as db_int
 import FinChannelDETAILS
-import pandas as pd
 
 
 def get_youtube_api_conn(api_key):
@@ -30,7 +29,6 @@ def get_youtube_api_conn(api_key):
     return api_connection
 
 
-
 def run(api_key, pre_def_channel_ids):
     """
     :param api_key:
@@ -52,8 +50,7 @@ def run(api_key, pre_def_channel_ids):
     db_int.drop_and_create_video_dets_table(db_conn)
     db_int.drop_and_create_comment_dets_table(db_conn)
 
-
-    # Get the channel details for the pre defined list of channel ids
+    # Get the channel details for the pre-defined list of channel ids
     channels_info = FinChannelDETAILS.get_channels_info(pre_def_channel_ids, api_connection)
     db_int.add_data_to_channel_dets_table(channels_info, db_conn)
 
@@ -71,15 +68,12 @@ def run(api_key, pre_def_channel_ids):
 
 
 if __name__ == '__main__':
-    #api_key = [sys.argv[0]]
+
     api_key = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
 
     pre_def_channel_ids = ["UChGd9JY4yMegY6PxqpBjpRA", "UCrgLTEHTvedDsxdQzSAFyDA",
                            "UC5B0fGVovcbBJXQBx5kmRhQ", "UCKmE9i2iW0KaqgSxVFYmZUw",
                            "UC21vCCoVSqgB7NzZjxB9weg", "UC4c3Q2ym_hYei2cipr_KNaw"]
-                            #, "UCy1lBBbXhtfzugF_LK2b6Yw",
-                            #"UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]
-                            ###"UC5HdAapbvqWN65GIqpWWL3Q",
 
     run(api_key, pre_def_channel_ids)
 
@@ -87,6 +81,13 @@ if __name__ == '__main__':
 
 
 
+
+
+
+
+#, "UCy1lBBbXhtfzugF_LK2b6Yw",
+#"UCqwLyQUYPBP_4CVh7AMxNOQ", "UC7cgHgo42oYABKWabReHZyA"]
+###"UC5HdAapbvqWN65GIqpWWL3Q",
 
 
 

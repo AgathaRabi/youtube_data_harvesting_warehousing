@@ -1,9 +1,9 @@
-from googleapiclient.discovery import build
+
 import streamlit as st
 import psycopg2
 import pandas as pd
 import FinDATABASEinterface as db_int
-from sqlalchemy import create_engine
+
 import plotly.express as px
 import FinMAIN
 import FinVIDEOmetaDATA
@@ -15,7 +15,7 @@ api_key = "AIzaSyD_GoAklQv0-JaNW4HVOzJlScGhZPjUtoU"
 API_conn = FinMAIN.get_youtube_api_conn(api_key)
 
 # The streamlit program lines
-# st.set_page_config(layout="wide")
+
 st.title(":red[YOUTUBE DATA HARVESTING AND WAREHOUSING]"
          "📚💻✍🏼📓📶")
 st.sidebar.title("VIEW")
@@ -121,8 +121,7 @@ elif page == "📞I/p Channel Id":
             video_meta_data = FinVIDEOmetaDATA.get_videos_meta_data_for_videos(video_ids, API_conn)
             video_comment_meta_data = FinVIDEOmetaDATA.get_comment_details_videos(
                                                                         video_ids, API_conn)
-            #print(channel_info)
-            #print(pd.DataFrame(channel_info, index = [0]))
+
             db_int.add_data_to_channel_dets_table(pd.DataFrame(channel_info, index = [0]), db_conn)
             db_int.add_data_to_video_dets_table(pd.DataFrame(video_meta_data), db_conn)
             db_int.add_data_to_comments_dets_table(pd.DataFrame(video_comment_meta_data), db_conn)
@@ -175,6 +174,7 @@ elif page == "📜Queries & Answers":
                                 channel_name FROM video_details''', db_conn)
         dataframe_ans_q1 = st.dataframe(query_one)
 
+    ## query two - retrieving the ans from sql and displaying in streamlit
 
     elif question == "2. Channels with the most number of videos":
 
@@ -256,7 +256,6 @@ elif page == "📜Queries & Answers":
         dataframe_ans_q8 = st.dataframe(query_eight)
 
 
-
     elif question == "9. average duration of videos in each channel and channel name":
 
         query_nine = pd.read_sql('''SELECT channel_name, 
@@ -299,12 +298,8 @@ elif page == "🦾 Outcomes":
     )
     st.write("On completion of this capstone project, the following are my takeaways:")
     st.write("1. Able to write code to fetch data from YouTube using Google API")
-    st.write("2. learnt to stored the fetched data into SQL as Data Base")
-    st.write("3. have been able to visualize the data using STREAMLIT UI")
-    st.write("4. have been able to collect data for up to 10 different YouTube channels")
+    st.write("2. Learnt to store the fetched data into SQL as Data Base")
+    st.write("3. Have been able to visualize the data using STREAMLIT UI")
+    st.write("4. Have been able to collect data for up to 10 different YouTube channels")
     st.write("5. Am more confident about debugging")
 
-
-# dark pink - url("https://i.pinimg.com/originals/5f/19/79/5f197938702983ec7b9e3ad700f1f7cc.gif");
-# simple utube - url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5DSnAllpbDrfsNbsMMEV9LhUQWDc0Czg40Q&s");
-# paper design and scissors - url("https://i.pinimg.com/originals/5f/19/79/5f197938702983ec7b9e3ad700f1f7cc.gif");
