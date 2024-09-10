@@ -1,44 +1,29 @@
-# streamlit installed
+**PROJECT STATEMENT**
 
-# test
-
-# created API KEY
-
-NET STEP:
-
-## next step is accessing data from you tube
-        ## for that we need to write a function
-            ## before that get the needed packages
-
-## downloading the package that would make the API key work
-    ## pip install google-api-client
-
-# import the downloaded package
-
-## create the function for API connect
-
-        ##Note: We get the Api_Id(key) by using the argument developerKey
-
-# and then we call the function api_connect
-
-NEXT STEP:
-
-# Now……
-	## get channel’s information
-        	Supposed to create function to get channel info.
-           Mean time get a youtube channels' 'Channel_Id' (from 'about' --->  'share')
+	To create a StreamLit application to access and analyze data from multiple YouTube channels.
+	Fetch data using google API.
+	Store data in SQL.
+	Retrieve data from SQL database for analysis and visualization.
 
 
-......
-.........
-..........
+**PROJECT OVERVIEW**
 
-...........,
+![image](https://github.com/user-attachments/assets/06f92d9d-5339-42bf-9928-19ff9f5c9a90)
 
-## pip install pymongo (in terminal - command prompt)
 
-        # installed mongodb
-        # imported pymongo
+**PROJECT IMPLEMENTATION FLOW**
+
+	Fetch Data
+ 	Store Data in Database
+  	Retrieve for analysis and Visualization
+
+
+
+
+
+
+
+
 
 
 
